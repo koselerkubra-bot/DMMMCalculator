@@ -1,8 +1,4 @@
-﻿"""
-DMMM 2026 Results Engine - Core Calculation & Parsing Logic
-"""
-
-import io
+﻿import io
 import re
 import hashlib
 from typing import Dict, Any, List, Optional, Tuple
@@ -22,24 +18,20 @@ CANONICAL_CAPABILITIES = {
 
 PREPOPULATED_ROWS = {13, 23, 24, 46, 60, 69, 70, 71, 89, 90}
 
-
 class DMMMEngine:
     @staticmethod
     def normalize_score(raw_val: Any) -> Tuple[Optional[float], str]:
         if raw_val is None or str(raw_val).strip() == "":
             return None, "missing"
-        
         val_str = str(raw_val).strip()
         match = re.match(r"^([0-4])(?:\s*-\s*|\s*\()?", val_str)
         if match:
             return float(match.group(1)), "valid"
-            
         return None, "invalid"
 
     @classmethod
     def parse_and_calculate(cls, file_bytes: bytes, filename: str = "upload.xlsm") -> Dict[str, Any]:
         file_hash = hashlib.sha256(file_bytes).hexdigest()
-        
         try:
             wb = openpyxl.load_workbook(io.BytesIO(file_bytes), data_only=True, keep_vba=False)
         except Exception as e:

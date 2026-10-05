@@ -1,9 +1,4 @@
-﻿"""
-FastAPI Microservice for DMMM Engine
-Usage: uvicorn dmmm_engine.api:app --reload --port 8000
-"""
-
-from fastapi import FastAPI, UploadFile, File, HTTPException
+﻿from fastapi import FastAPI, UploadFile, File, HTTPException
 from dmmm_engine.core import DMMMEngine
 
 app = FastAPI(

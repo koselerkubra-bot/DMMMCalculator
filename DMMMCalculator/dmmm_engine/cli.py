@@ -1,9 +1,4 @@
-﻿"""
-CLI Tool for DMMM 2026 Engine
-Usage: python -m dmmm_engine.cli <path_to_workbook.xlsm>
-"""
-
-import sys
+﻿import sys
 import json
 from pathlib import Path
 from dmmm_engine.core import DMMMEngine
