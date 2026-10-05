@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DMMM 2026 Results Engine - Syngenta</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SheetJS for Safe In-Browser Excel Parsing (No VBA Execution) -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <!-- Chart.js for Radar & Bar Charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-emerald-800 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-5 flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight">DMMM 2026 Results Engine</h1>
+                <p class="text-emerald-100 text-sm mt-0.5">Syngenta Crop Protection — Digital Marketing Maturity Model</p>
+            </div>
+            <span class="bg-emerald-900 border border-emerald-700 px-3 py-1 rounded-full text-xs font-semibold text-emerald-200">
+                Profile: Global V1 / AMEA
+            </span>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        
+        <!-- Upload Card -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8">
+            <h2 class="text-lg font-semibold text-slate-900 mb-2">Upload Assessment Workbook</h2>
+            <p class="text-sm text-slate-500 mb-4">Select a completed country DMMM workbook (<code class="bg-slate-100 px-1 py-0.5 rounded text-xs">.xlsm</code> or <code class="bg-slate-100 px-1 py-0.5 rounded text-xs">.xlsx</code>). The engine parses raw inputs and calculates results independently of Excel formulas/macros.</p>
+            
+            <div class="flex items-center gap-4">
+                <input type="file" id="workbookFile" accept=".xlsx,.xlsm" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer border border-slate-200 rounded-lg"/>
+                <button onclick="processWorkbook()" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm rounded-lg shadow-sm transition-colors whitespace-nowrap">
+                    Calculate Results
+                </button>
+            </div>
+            <div id="errorBox" class="hidden mt-4 p-4 bg-rose-50 border border-rose-200 rounded-lg text-rose-700 text-sm"></div>
+        </div>
+
+        <!-- Results Area -->
+        <div id="resultsArea" class="hidden space-y-8">
+
+            <!-- Executive Scorecards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Country / Submitter</p>
+                    <p id="resCountry" class="text-xl font-bold text-slate-900 mt-1">-</p>
+                    <p id="resSubmitter" class="text-xs text-slate-500 mt-0.5">-</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Overall Current Score</p>
+                    <p id="resCurrentScore" class="text-3xl font-extrabold text-emerald-600 mt-1">-</p>
+                    <p class="text-xs text-slate-400 mt-0.5">Scale: 0.00 – 4.00</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Target Score (+1Y)</p>
+                    <p id="resTargetScore" class="text-3xl font-extrabold text-blue-600 mt-1">-</p>
+                    <p id="resGap" class="text-xs font-medium text-blue-600 mt-0.5">Gap: +0.00</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Detected Profile</p>
+                    <p id="resProfile" class="text-sm font-semibold text-slate-800 mt-2">DMMM_2026_GLOBAL</p>
+                    <span id="resStatusBadge" class="inline-block mt-2 px-2.5 py-0.5 bg-emerald-100 text-emerald-800 rounded-full text-xs font-semibold">Ready to Calculate</span>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Radar Chart -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="text-base font-semibold text-slate-900 mb-4">9-Capability Radar View</h3>
+                    <div class="h-80 relative flex items-center justify-center">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Bar Comparison Chart -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="text-base font-semibold text-slate-900 mb-4">Current vs Target by Capability</h3>
+                    <div class="h-80 relative">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 9 Capabilities Detailed Table -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+                    <h3 class="text-base font-semibold text-slate-900">Equal-Weighted Capability Scores</h3>
+                    <span class="text-xs text-slate-500">9 Capabilities (Equal 1/9 Weight)</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-slate-600">
+                        <thead class="bg-slate-50 text-xs font-semibold text-slate-700 uppercase border-b border-slate-200">
+                            <tr>
+                                <th class="px-6 py-3">Capability</th>
+                                <th class="px-4 py-3 text-center">Included Skills</th>
+                                <th class="px-4 py-3 text-center">Current Score</th>
+                                <th class="px-4 py-3 text-center">Target Score (+1Y)</th>
+                                <th class="px-4 py-3 text-center">Gap</th>
+                                <th class="px-4 py-3 text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="capabilityTableBody" class="divide-y divide-slate-100">
+                            <!-- Injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        const CANONICAL_CAPABILITIES = {
+            "DMS": { name: "Digital Marketing Strategy", rows: [5,6,7,8,9,10,11,12,13] },
+            "CONTENT": { name: "Content Marketing", rows: [14,15,16,17,18,19,20,21,22,23,24] },
+            "PAID_MEDIA": { name: "Paid Digital Media", rows: [25,26,27,28,29,30,31,32,33,34,35,36] },
+            "SOCIAL": { name: "Social Media", rows: [37,38,39,40,41,42,43,44,45,46] },
+            "INFLUENCER": { name: "Influencer Marketing & Partnership", rows: [47,48,49,50,51] },
+            "UX": { name: "UX / Web Design / Mobile", rows: [52,53,54,55,56,57,58,59,60] },
+            "SEO": { name: "Search Engine Optimization (SEO)", rows: [61,62,63,64,65,66,67,68,69,70,71] },
+            "DATA_ANALYTICS": { name: "Data & Analytics", rows: [72,73,74,75,76,77,78,79,80] },
+            "MARKETING_AUTO": { name: "Marketing Automation", rows: [81,82,83,84,85,86,87,88,89,90] }
+        };
+
+        let radarChartInstance = null;
+        let barChartInstance = null;
+
+        function normalizeScore(val) {
+            if (val === undefined || val === null || String(val).trim() === "") return null;
+            const match = String(val).trim().match(/^([0-4])/);
+            return match ? parseFloat(match[1]) : null;
+        }
+
+        async function processWorkbook() {
+            const fileInput = document.getElementById('workbookFile');
+            const errorBox = document.getElementById('errorBox');
+            const resultsArea = document.getElementById('resultsArea');
+            
+            errorBox.classList.add('hidden');
+            errorBox.innerHTML = '';
+
+            if (!fileInput.files.length) {
+                errorBox.innerHTML = 'Please choose an Excel file (.xlsm or .xlsx) first.';
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const data = await file.arrayBuffer();
+
+            try {
+                // Read safely without executing macros
+                const wb = XLSX.read(data, { type: 'array' });
+
+                if (!wb.Sheets["DMMM Questionnaire"]) {
+                    throw new Error("Missing required sheet: 'DMMM Questionnaire'.");
+                }
+
+                const qWs = wb.Sheets["DMMM Questionnaire"];
+                const suWs = wb.Sheets["Sign-up"] || {};
+
+                // Metadata
+                const submitter = suWs['D5'] ? suWs['D5'].v : 'Unassigned';
+                const country = suWs['D7'] ? suWs['D7'].v : 'Global/Unknown';
+                const r4Val = qWs['R4'] ? String(qWs['R4'].v) : '';
+                const profile = r4Val.includes("Reviewer Notes (AMEA)") ? "DMMM_2026_AMEA" : "DMMM_2026_GLOBAL_WORKBOOK_V1";
+
+                document.getElementById('resCountry').innerText = country;
+                document.getElementById('resSubmitter').innerText = `Submitter: ${submitter}`;
+                document.getElementById('resProfile').innerText = profile;
+
+                const capResults = {};
+                const capLabels = [];
+                const currentScoresArr = [];
+                const targetScoresArr = [];
+
+                let tableHtml = '';
+
+                for (const [key, cap] of Object.entries(CANONICAL_CAPABILITIES)) {
+                    let currSum = 0, currCount = 0;
+                    let tgtSum = 0, tgtCount = 0;
+                    let totalInc = 0;
+
+                    cap.rows.forEach(r => {
+                        const pCell = qWs[`P${r}`];
+                        const kCell = qWs[`K${r}`];
+                        const lCell = qWs[`L${r}`];
+
+                        const pVal = (pCell && pCell.v !== undefined) ? parseInt(pCell.v) : 1;
+                        if (pVal === 1) {
+                            totalInc++;
+                            const curr = normalizeScore(kCell ? kCell.v : null);
+                            const tgt = normalizeScore(lCell ? lCell.v : null);
+
+                            if (curr !== null) { currSum += curr; currCount++; }
+                            if (tgt !== null) { tgtSum += tgt; tgtCount++; }
+                        }
+                    });
+
+                    const currMean = currCount > 0 ? (currSum / currCount) : null;
+                    const tgtMean = tgtCount > 0 ? (tgtSum / tgtCount) : null;
+                    const gap = (currMean !== null && tgtMean !== null) ? (tgtMean - currMean) : null;
+
+                    capResults[key] = { name: cap.name, curr: currMean, tgt: tgtMean, gap, inc: totalInc };
+                    capLabels.push(cap.name);
+                    currentScoresArr.push(currMean ? Number(currMean.toFixed(2)) : 0);
+                    targetScoresArr.push(tgtMean ? Number(tgtMean.toFixed(2)) : 0);
+
+                    tableHtml += `
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-4 font-medium text-slate-900">${cap.name}</td>
+                            <td class="px-4 py-4 text-center">${totalInc}</td>
+                            <td class="px-4 py-4 text-center font-bold text-emerald-600">${currMean !== null ? currMean.toFixed(2) : '-'}</td>
+                            <td class="px-4 py-4 text-center font-bold text-blue-600">${tgtMean !== null ? tgtMean.toFixed(2) : '-'}</td>
+                            <td class="px-4 py-4 text-center text-xs font-semibold ${gap > 0 ? 'text-blue-600' : 'text-slate-500'}">
+                                ${gap !== null ? (gap >= 0 ? '+' + gap.toFixed(2) : gap.toFixed(2)) : '-'}
+                            </td>
+                            <td class="px-4 py-4 text-center">
+                                <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">Valid</span>
+                            </td>
+                        </tr>
+                    `;
+                }
+
+                document.getElementById('capabilityTableBody').innerHTML = tableHtml;
+
+                // Overall 9-capability arithmetic mean
+                const validCurr = Object.values(capResults).map(c => c.curr).filter(c => c !== null);
+                const validTgt = Object.values(capResults).map(c => c.tgt).filter(c => c !== null);
+
+                const overallCurr = validCurr.length === 9 ? (validCurr.reduce((a,b)=>a+b, 0) / 9) : null;
+                const overallTgt = validTgt.length === 9 ? (validTgt.reduce((a,b)=>a+b, 0) / 9) : null;
+
+                document.getElementById('resCurrentScore').innerText = overallCurr ? overallCurr.toFixed(2) : 'Incomplete';
+                document.getElementById('resTargetScore').innerText = overallTgt ? overallTgt.toFixed(2) : '-';
+                if (overallCurr && overallTgt) {
+                    const oGap = overallTgt - overallCurr;
+                    document.getElementById('resGap').innerText = `Gap: ${oGap >= 0 ? '+' : ''}${oGap.toFixed(2)}`;
+                }
+
+                renderCharts(capLabels, currentScoresArr, targetScoresArr);
+                resultsArea.classList.remove('hidden');
+
+            } catch (err) {
+                errorBox.innerHTML = `<strong>Calculation Error:</strong> ${err.message}`;
+                errorBox.classList.remove('hidden');
+            }
+        }
+
+        function renderCharts(labels, currentData, targetData) {
+            if (radarChartInstance) radarChartInstance.destroy();
+            if (barChartInstance) barChartInstance.destroy();
+
+            // Radar Chart
+            const ctxRadar = document.getElementById('radarChart').getContext('2d');
+            radarChartInstance = new Chart(ctxRadar, {
+                type: 'radar',
+                data: {
+                    labels: labels.map(l => l.length > 18 ? l.substring(0, 18) + '...' : l),
+                    datasets: [
+                        {
+                            label: 'Current Score',
+                            data: currentData,
+                            borderColor: 'rgb(5, 150, 105)',
+                            backgroundColor: 'rgba(5, 150, 105, 0.2)',
+                            pointBackgroundColor: 'rgb(5, 150, 105)'
+                        },
+                        {
+                            label: 'Target Score (+1Y)',
+                            data: targetData,
+                            borderColor: 'rgb(37, 99, 235)',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            borderDash: [4, 4],
+                            pointBackgroundColor: 'rgb(37, 99, 235)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: { min: 0, max: 4, ticks: { stepSize: 1 } }
+                    }
+                }
+            });
+
+            // Bar Chart
+            const ctxBar = document.getElementById('barChart').getContext('2d');
+            barChartInstance = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: labels.map(l => l.length > 15 ? l.substring(0, 15) + '...' : l),
+                    datasets: [
+                        { label: 'Current', data: currentData, backgroundColor: 'rgb(5, 150, 105)' },
+                        { label: 'Target', data: targetData, backgroundColor: 'rgb(37, 99, 235)' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { min: 0, max: 4, ticks: { stepSize: 1 } }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
