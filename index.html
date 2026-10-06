@@ -1,425 +1,60 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DMMM 2026 Results Engine & Global Data Hub</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>DMMM 2026 Results Engine</title>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <style>
+    :root{--ink:#16251e;--muted:#5f6d65;--paper:#fff;--bg:#f1f5f2;--line:#d7e2da;--green:#147a42;--green-dark:#075c30;--mint:#dff3e6;--blue:#145da0;--blue-lite:#e5f0fa;--amber:#a45b00;--amber-lite:#fff3df;--red:#a92b26;--red-lite:#fde9e7;--grey:#eef2ef;--radius:12px;--shadow:0 2px 14px rgba(22,37,30,.08)}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);font:14px/1.45 "Segoe UI",Arial,sans-serif;color:var(--ink)}
+    header{background:var(--green-dark);color:#fff;padding:23px max(22px,calc((100% - 1220px)/2));display:flex;justify-content:space-between;align-items:start;gap:16px}.eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;opacity:.75}h1{font-size:28px;margin:3px 0 4px}h2{font-size:17px;margin:0}h3{font-size:14px;margin:0}.sub{opacity:.85;font-size:13px}.badge{display:inline-block;padding:4px 9px;border-radius:999px;font-size:11px;font-weight:700;background:#ffffff1d;border:1px solid #ffffff47;white-space:nowrap}
+    main{max-width:1220px;margin:0 auto;padding:26px 20px 54px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}.card p{color:var(--muted);margin:7px 0 16px;font-size:13px}.cap{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px}.dot{height:9px;width:9px;border-radius:50%;background:var(--green)}.dot.blue{background:var(--blue)}
+    input[type=file]{width:100%;padding:10px;border:1px dashed #aabaae;border-radius:8px;background:#fbfdfb;font-size:12px}button{cursor:pointer;border:0;border-radius:7px;padding:9px 12px;font-weight:700;font-size:12px;background:var(--green);color:#fff}button:hover{background:var(--green-dark)}button.secondary{background:#fff;color:var(--ink);border:1px solid var(--line)}button.blue{background:var(--blue)}button.warning{background:var(--amber)}button:disabled{opacity:.5;cursor:not-allowed}
+    .note{margin-top:18px;padding:12px 14px;border-radius:8px;background:#eaf6ef;border:1px solid #c9e4d2;color:#205832;font-size:12px}.note strong{display:block;margin-bottom:2px}.alert{margin:18px 0;padding:12px 14px;border-radius:8px;font-size:13px}.alert.info{background:var(--blue-lite);border:1px solid #c8ddf0;color:#154f7e}.alert.warning{background:var(--amber-lite);border:1px solid #f1dbb7;color:#7a4400}.alert.error{background:var(--red-lite);border:1px solid #f0c7c4;color:#82231f}.hidden{display:none!important}
+    .section{margin-top:22px}.sectionhead{display:flex;justify-content:space-between;align-items:end;margin:0 0 10px;gap:12px}.sectionhead p{margin:3px 0 0;color:var(--muted);font-size:12px}.toolbar{display:flex;gap:7px;flex-wrap:wrap;align-items:center}.toolbar label{font-size:12px;color:var(--muted)}select{padding:8px;border:1px solid var(--line);border-radius:7px;background:#fff;font-size:12px}
+    .tablewrap{overflow:auto;border:1px solid var(--line);border-radius:10px;background:#fff}.table{width:100%;border-collapse:collapse;white-space:nowrap}.table th{background:#f5f8f6;color:#52625a;font-size:10px;text-transform:uppercase;letter-spacing:.04em;text-align:left;padding:10px;border-bottom:1px solid var(--line);position:sticky;top:0}.table td{padding:10px;border-bottom:1px solid #e9efeb;vertical-align:middle;font-size:12px}.table tr:last-child td{border:0}.table tr:hover td{background:#fbfdfb}.number{text-align:right;font-variant-numeric:tabular-nums}.status{font-size:10px;font-weight:700;padding:4px 7px;border-radius:999px;white-space:nowrap}.s-ok{color:var(--green-dark);background:var(--mint)}.s-pending{color:#805000;background:var(--amber-lite)}.s-review{color:var(--red);background:var(--red-lite)}.s-neutral{color:#51615a;background:var(--grey)}
+    .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:14px 0}.kpi{background:#fff;border:1px solid var(--line);border-radius:9px;padding:13px}.kpi .label{font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:700}.kpi .value{font-size:23px;font-weight:700;margin-top:3px}.kpi .small{font-size:11px;color:var(--muted)}
+    .detail{margin-top:24px}.detailtop{display:flex;justify-content:space-between;align-items:start;gap:18px}.twocol{display:grid;grid-template-columns:1fr 1.4fr;gap:18px;margin-top:16px}.metricrow{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #edf1ee;font-size:12px}.metricrow:last-child{border:0}.bar{width:120px;height:7px;background:#e8efea;border-radius:99px;overflow:hidden}.bar span{display:block;height:100%;background:var(--green)}.caption{font-size:11px;color:var(--muted);margin:8px 0 0}.no-data{padding:24px;color:var(--muted);text-align:center}
+    @media(max-width:850px){.grid,.twocol{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}header{padding:20px}.sectionhead{align-items:start;flex-direction:column}}
+  </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen">
-
-    <header class="bg-emerald-800 text-white shadow-md">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap justify-between items-center gap-4">
-            <div>
-                <h1 class="text-2xl font-bold tracking-tight">DMMM 2026 Results Engine</h1>
-                <p class="text-emerald-100 text-xs">Syngenta Crop Protection — Multi-Country & Global Ingestion Hub</p>
-            </div>
-            <div class="flex gap-2">
-                <span class="bg-emerald-900 border border-emerald-700 px-3 py-1 rounded-full text-xs font-semibold text-emerald-200">
-                    Dual Engine: Self + Validated
-                </span>
-            </div>
-        </div>
-    </header>
-
-    <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
-        
-        <!-- Upload Grids -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            
-            <!-- 1. Multi-Country Assessment Upload -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> 1. Country Workbooks (Multi-Upload)
-                        </h2>
-                        <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono">.xlsm / .xlsx</span>
-                    </div>
-                    <p class="text-xs text-slate-500 mb-4">Select one or multiple completed country assessment workbooks. Raw self-scores and inclusion flags ($P=1/0$) will be processed.</p>
-                </div>
-                <div>
-                    <input type="file" id="countryFiles" multiple accept=".xlsx,.xlsm" class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer border border-slate-200 rounded-lg"/>
-                    <button onclick="processCountryFiles()" class="mt-3 w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs rounded-lg shadow-sm transition-colors">
-                        Process Country Workbooks
-                    </button>
-                </div>
-            </div>
-
-            <!-- 2. Global Data Hub Ingestion -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> 2. Global Data Hub (Prepopulated Metrics)
-                        </h2>
-                        <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-mono">10 Canonical Skills</span>
-                    </div>
-                    <p class="text-xs text-slate-500 mb-4">Upload GDM tracker or tool exports (Lighthouse, SEMrush, GA4, Emplifi, Canva) to populate official validated scores for rows 13, 23, 24, 46, 60, 69–71, 89, 90.</p>
-                </div>
-                <div>
-                    <input type="file" id="globalFile" accept=".xlsx,.csv" class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer border border-slate-200 rounded-lg"/>
-                    <button onclick="processGlobalFile()" class="mt-3 w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs rounded-lg shadow-sm transition-colors">
-                        Ingest Global Objective Data
-                    </button>
-                </div>
-            </div>
-
-        </div>
-
-        <div id="statusAlert" class="hidden p-4 rounded-lg text-xs"></div>
-
-        <!-- Multi-Country Comparison Table -->
-        <div id="portfolioSection" class="hidden bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
-                <div>
-                    <h3 class="text-sm font-bold text-slate-900">Multi-Country Portfolio Overview</h3>
-                    <p class="text-xs text-slate-500">Click on any country to view deep-dive radar & capability gap analysis</p>
-                </div>
-                <span id="countryCountBadge" class="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-xs font-semibold rounded-full">0 Countries Loaded</span>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs text-slate-600">
-                    <thead class="bg-slate-100 text-[11px] font-semibold text-slate-700 uppercase border-b border-slate-200">
-                        <tr>
-                            <th class="px-4 py-3">Market / Country</th>
-                            <th class="px-4 py-3">Submitter</th>
-                            <th class="px-4 py-3">Profile</th>
-                            <th class="px-4 py-3 text-center">Self Current</th>
-                            <th class="px-4 py-3 text-center">Validated Current</th>
-                            <th class="px-4 py-3 text-center">Target (+1Y)</th>
-                            <th class="px-4 py-3 text-center">Target Gap</th>
-                            <th class="px-4 py-3 text-center">Global Status</th>
-                            <th class="px-4 py-3 text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="portfolioTableBody" class="divide-y divide-slate-100 font-medium"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Single Country Detail View -->
-        <div id="countryDetailSection" class="hidden space-y-6">
-            <div class="flex items-center justify-between border-b border-slate-200 pb-3">
-                <div>
-                    <h3 class="text-lg font-bold text-slate-900" id="detailCountryTitle">Country Deep Dive</h3>
-                    <p class="text-xs text-slate-500" id="detailCountrySubtitle">Detailed capability and skill breakdown</p>
-                </div>
-                <button onclick="document.getElementById('countryDetailSection').classList.add('hidden')" class="text-xs text-slate-500 hover:text-slate-800 underline">Close Detail</button>
-            </div>
-
-            <!-- Charts Section -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">Capability Radar (Self vs Validated)</h4>
-                    <div class="h-72"><canvas id="radarChart"></canvas></div>
-                </div>
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">Target Gap Analysis</h4>
-                    <div class="h-72"><canvas id="barChart"></canvas></div>
-                </div>
-            </div>
-
-            <!-- Prepopulated 10 Skills Inspection Panel -->
-            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
-                <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-blue-500"></span> Global-Managed / Prepopulated Skills Status (10 Canonical Rows)
-                </h4>
-                <div class="overflow-x-auto mt-3">
-                    <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-50 text-slate-600 border-b border-slate-200 text-[11px]">
-                            <tr>
-                                <th class="px-3 py-2">Row</th>
-                                <th class="px-3 py-2">Skill Name</th>
-                                <th class="px-3 py-2">Source System</th>
-                                <th class="px-3 py-2 text-center">Self Score</th>
-                                <th class="px-3 py-2 text-center">Official/Global Score</th>
-                                <th class="px-3 py-2 text-center">Discrepancy Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="prepopTableBody" class="divide-y divide-slate-100"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-    </main>
-
-    <script>
-        const CANONICAL_CAPABILITIES = {
-            "DMS": { name: "Digital Marketing Strategy", rows: [5,6,7,8,9,10,11,12,13] },
-            "CONTENT": { name: "Content Marketing", rows: [14,15,16,17,18,19,20,21,22,23,24] },
-            "PAID_MEDIA": { name: "Paid Digital Media", rows: [25,26,27,28,29,30,31,32,33,34,35,36] },
-            "SOCIAL": { name: "Social Media", rows: [37,38,39,40,41,42,43,44,45,46] },
-            "INFLUENCER": { name: "Influencer Marketing & Partnership", rows: [47,48,49,50,51] },
-            "UX": { name: "UX / Web Design / Mobile", rows: [52,53,54,55,56,57,58,59,60] },
-            "SEO": { name: "Search Engine Optimization (SEO)", rows: [61,62,63,64,65,66,67,68,69,70,71] },
-            "DATA_ANALYTICS": { name: "Data & Analytics", rows: [72,73,74,75,76,77,78,79,80] },
-            "MARKETING_AUTO": { name: "Marketing Automation", rows: [81,82,83,84,85,86,87,88,89,90] }
-        };
-
-        const PREPOPULATED_META = {
-            13: { name: "DMS Completion", source: "Global Campaign Dashboard" },
-            23: { name: "Canva Usage", source: "Canva Enterprise" },
-            24: { name: "Trinity Usage", source: "Trinity DAM" },
-            46: { name: "Emplifi Usage", source: "Emplifi Analytics" },
-            60: { name: "Web Performance & Accessibility", source: "Google Lighthouse / CWV" },
-            69: { name: "Technical SEO Health Score", source: "SEMrush / Ahrefs" },
-            70: { name: "Core Web Vitals & Page Experience", source: "Google Search Console" },
-            71: { name: "Schema Validity Score", source: "Schema App" },
-            89: { name: "Marketing Capabilities within SFMC", source: "Salesforce Marketing Cloud" },
-            90: { name: "List Health & Deliverability", source: "SFMC Deliverability" }
-        };
-
-        let assessments = {}; // country_id -> data
-        let globalOverrides = {}; // country_name -> { row: score }
-        let radarChartInstance = null;
-        let barChartInstance = null;
-
-        function normalizeScore(val) {
-            if (val === undefined || val === null || String(val).trim() === "") return null;
-            const match = String(val).trim().match(/^([0-4])/);
-            return match ? parseFloat(match[1]) : null;
-        }
-
-        async function processCountryFiles() {
-            const input = document.getElementById('countryFiles');
-            if (!input.files.length) return alert('Please select at least one workbook.');
-
-            for (let file of input.files) {
-                const data = await file.arrayBuffer();
-                const wb = XLSX.read(data, { type: 'array' });
-                if (!wb.Sheets["DMMM Questionnaire"]) continue;
-
-                const qWs = wb.Sheets["DMMM Questionnaire"];
-                const suWs = wb.Sheets["Sign-up"] || {};
-
-                const country = suWs['D7'] ? String(suWs['D7'].v).trim() : file.name.replace(/\.[^/.]+$/, "");
-                const submitter = suWs['D5'] ? String(suWs['D5'].v).trim() : 'Unassigned';
-                const r4Val = qWs['R4'] ? String(qWs['R4'].v) : '';
-                const profile = r4Val.includes("Reviewer Notes (AMEA)") ? "AMEA" : "Global V1";
-
-                const skills = {};
-                for (let r = 5; r <= 90; r++) {
-                    const pCell = qWs[`P${r}`];
-                    const kCell = qWs[`K${r}`];
-                    const lCell = qWs[`L${r}`];
-                    const pVal = (pCell && pCell.v !== undefined) ? parseInt(pCell.v) : 1;
-
-                    skills[r] = {
-                        row: r,
-                        included: pVal === 1,
-                        selfScore: normalizeScore(kCell ? kCell.v : null),
-                        targetScore: normalizeScore(lCell ? lCell.v : null)
-                    };
-                }
-
-                assessments[country] = {
-                    country, submitter, profile, skills, fileName: file.name
-                };
-            }
-
-            renderPortfolio();
-        }
-
-        async function processGlobalFile() {
-            const input = document.getElementById('globalFile');
-            if (!input.files.length) return alert('Select Global Data file (.xlsx/.csv)');
-
-            const file = input.files[0];
-            const data = await file.arrayBuffer();
-            const wb = XLSX.read(data, { type: 'array' });
-            const sheet = wb.Sheets[wb.SheetNames[0]];
-            const json = XLSX.utils.sheet_to_json(sheet);
-
-            // Expecting columns: Country, Row / Skill ID, Official Score
-            json.forEach(row => {
-                const country = row["Country"] || row["country"] || row["Market"];
-                const rowNum = parseInt(row["Row"] || row["row"] || row["Skill_Row"]);
-                const score = normalizeScore(row["Score"] || row["Official_Score"] || row["score"]);
-
-                if (country && rowNum && score !== null) {
-                    if (!globalOverrides[country]) globalOverrides[country] = {};
-                    globalOverrides[country][rowNum] = score;
-                }
-            });
-
-            showAlert(`Global Data ingested for ${Object.keys(globalOverrides).length} countries. Validated scores updated.`, 'bg-blue-50 text-blue-700 border border-blue-200');
-            renderPortfolio();
-        }
-
-        function calculateCountryResults(country) {
-            const data = assessments[country];
-            const gData = globalOverrides[country] || {};
-
-            let capScores = {};
-            let selfCapSum = 0, valCapSum = 0, tgtCapSum = 0;
-            let missingGlobalCount = 0;
-
-            for (const [key, cap] of Object.entries(CANONICAL_CAPABILITIES)) {
-                let sSum = 0, sCnt = 0;
-                let vSum = 0, vCnt = 0;
-                let tSum = 0, tCnt = 0;
-
-                cap.rows.forEach(r => {
-                    const sk = data.skills[r];
-                    if (!sk || !sk.included) return;
-
-                    // Self
-                    if (sk.selfScore !== null) { sSum += sk.selfScore; sCnt++; }
-                    if (sk.targetScore !== null) { tSum += sk.targetScore; tCnt++; }
-
-                    // Validated: use Global override if prepopulated row, else fallback to self
-                    const isPrepop = PREPOPULATED_META[r] !== undefined;
-                    const officialScore = (isPrepop && gData[r] !== undefined) ? gData[r] : sk.selfScore;
-
-                    if (officialScore !== null) {
-                        vSum += officialScore; vCnt++;
-                    } else if (isPrepop) {
-                        missingGlobalCount++;
-                    }
-                });
-
-                const sMean = sCnt > 0 ? (sSum / sCnt) : null;
-                const vMean = vCnt > 0 ? (vSum / vCnt) : null;
-                const tMean = tCnt > 0 ? (tSum / tCnt) : null;
-
-                capScores[key] = { sMean, vMean, tMean, name: cap.name };
-
-                if (sMean !== null) selfCapSum += sMean;
-                if (vMean !== null) valCapSum += vMean;
-                if (tMean !== null) tgtCapSum += tMean;
-            }
-
-            return {
-                selfOverall: Number((selfCapSum / 9).toFixed(2)),
-                valOverall: Number((valCapSum / 9).toFixed(2)),
-                tgtOverall: Number((tgtCapSum / 9).toFixed(2)),
-                capScores,
-                missingGlobalCount
-            };
-        }
-
-        function renderPortfolio() {
-            const tbody = document.getElementById('portfolioTableBody');
-            tbody.innerHTML = '';
-            const countries = Object.keys(assessments);
-
-            if (!countries.length) return;
-
-            document.getElementById('portfolioSection').classList.remove('hidden');
-            document.getElementById('countryCountBadge').innerText = `${countries.length} Countries Loaded`;
-
-            countries.forEach(country => {
-                const res = calculateCountryResults(country);
-                const gap = res.tgtOverall - res.valOverall;
-
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition-colors";
-                tr.innerHTML = `
-                    <td class="px-4 py-3 font-bold text-slate-900">${country}</td>
-                    <td class="px-4 py-3 text-slate-500">${assessments[country].submitter}</td>
-                    <td class="px-4 py-3"><span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100">${assessments[country].profile}</span></td>
-                    <td class="px-4 py-3 text-center font-bold text-slate-700">${res.selfOverall.toFixed(2)}</td>
-                    <td class="px-4 py-3 text-center font-extrabold text-emerald-600">${res.valOverall.toFixed(2)}</td>
-                    <td class="px-4 py-3 text-center font-bold text-blue-600">${res.tgtOverall.toFixed(2)}</td>
-                    <td class="px-4 py-3 text-center font-semibold ${gap > 0 ? 'text-blue-600' : 'text-slate-400'}">${gap >= 0 ? '+' : ''}${gap.toFixed(2)}</td>
-                    <td class="px-4 py-3 text-center">
-                        ${res.missingGlobalCount === 0 ? 
-                            '<span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full text-[10px] font-bold">Verified</span>' : 
-                            `<span class="px-2 py-0.5 bg-amber-50 text-amber-700 rounded-full text-[10px] font-bold">${res.missingGlobalCount} Pending</span>`}
-                    </td>
-                    <td class="px-4 py-3 text-center">
-                        <button onclick="viewCountryDetail('${country}')" class="px-3 py-1 bg-slate-800 hover:bg-slate-900 text-white rounded text-xs">View</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function viewCountryDetail(country) {
-            const res = calculateCountryResults(country);
-            const aData = assessments[country];
-            const gData = globalOverrides[country] || {};
-
-            document.getElementById('detailCountryTitle').innerText = `${country} — Maturity Assessment`;
-            document.getElementById('detailCountrySubtitle').innerText = `Submitter: ${aData.submitter} | Model Profile: ${aData.profile}`;
-
-            // Render 10 Prepopulated Rows
-            const prepopBody = document.getElementById('prepopTableBody');
-            prepopBody.innerHTML = '';
-
-            Object.entries(PREPOPULATED_META).forEach(([rowStr, meta]) => {
-                const row = parseInt(rowStr);
-                const selfVal = aData.skills[row] ? aData.skills[row].selfScore : null;
-                const globalVal = gData[row] !== undefined ? gData[row] : null;
-
-                let statusBadge = '<span class="text-amber-600 font-semibold text-[10px]">Pending Global Data</span>';
-                if (globalVal !== null) {
-                    if (selfVal !== null && selfVal !== globalVal) {
-                        statusBadge = '<span class="text-rose-600 font-bold text-[10px]">Review Required (Mismatch)</span>';
-                    } else {
-                        statusBadge = '<span class="text-emerald-600 font-semibold text-[10px]">Validated</span>';
-                    }
-                }
-
-                prepopBody.innerHTML += `
-                    <tr>
-                        <td class="px-3 py-2 font-mono text-slate-500">${row}</td>
-                        <td class="px-3 py-2 font-medium text-slate-900">${meta.name}</td>
-                        <td class="px-3 py-2 text-slate-500">${meta.source}</td>
-                        <td class="px-3 py-2 text-center font-bold text-slate-700">${selfVal !== null ? selfVal : '-'}</td>
-                        <td class="px-3 py-2 text-center font-extrabold text-blue-600">${globalVal !== null ? globalVal : '<span class="text-slate-300">-</span>'}</td>
-                        <td class="px-3 py-2 text-center">${statusBadge}</td>
-                    </tr>
-                `;
-            });
-
-            // Render Radar & Bar
-            const labels = Object.values(res.capScores).map(c => c.name);
-            const selfScores = Object.values(res.capScores).map(c => c.sMean || 0);
-            const valScores = Object.values(res.capScores).map(c => c.vMean || 0);
-            const tgtScores = Object.values(res.capScores).map(c => c.tMean || 0);
-
-            if (radarChartInstance) radarChartInstance.destroy();
-            if (barChartInstance) barChartInstance.destroy();
-
-            radarChartInstance = new Chart(document.getElementById('radarChart'), {
-                type: 'radar',
-                data: {
-                    labels: labels.map(l => l.length > 15 ? l.substring(0, 15) + '...' : l),
-                    datasets: [
-                        { label: 'Self Assessed', data: selfScores, borderColor: 'rgb(148, 163, 184)', backgroundColor: 'rgba(148, 163, 184, 0.1)' },
-                        { label: 'Official Validated', data: valScores, borderColor: 'rgb(5, 150, 105)', backgroundColor: 'rgba(5, 150, 105, 0.2)' }
-                    ]
-                },
-                options: { scales: { r: { min: 0, max: 4, ticks: { stepSize: 1 } } }, maintainAspectRatio: false }
-            });
-
-            barChartInstance = new Chart(document.getElementById('barChart'), {
-                type: 'bar',
-                data: {
-                    labels: labels.map(l => l.length > 12 ? l.substring(0, 12) + '...' : l),
-                    datasets: [
-                        { label: 'Current Validated', data: valScores, backgroundColor: 'rgb(5, 150, 105)' },
-                        { label: 'Target (+1Y)', data: tgtScores, backgroundColor: 'rgb(37, 99, 235)' }
-                    ]
-                },
-                options: { scales: { y: { min: 0, max: 4, ticks: { stepSize: 1 } } }, maintainAspectRatio: false }
-            });
-
-            document.getElementById('countryDetailSection').classList.remove('hidden');
-            window.scrollTo({ top: document.getElementById('countryDetailSection').offsetTop - 20, behavior: 'smooth' });
-        }
-
-        function showAlert(msg, cls) {
-            const box = document.getElementById('statusAlert');
-            box.className = `p-4 rounded-lg text-xs ${cls}`;
-            box.innerHTML = msg;
-            box.classList.remove('hidden');
-        }
-    </script>
-</body>
-</html>
+<body>
+<header><div><div class="eyebrow">Syngenta Crop Protection</div><h1>DMMM 2026 Results Engine</h1><div class="sub">Country assessment calculation, GDM pre-population and portfolio reporting</div></div><span class="badge">MVP · Browser session</span></header>
+<main>
+  <div class="grid">
+    <section class="card"><div class="cap"><span class="dot"></span>Step 1</div><h2>Country Workbooks</h2><p>Upload one or more completed 2026 country DMMM workbooks. The engine reads <b>K</b> self-rating, <b>L</b> country-owned target and <b>P</b> inclusion flag. Macros and legacy result formulas are not used.</p><input id="countryFiles" type="file" multiple accept=".xlsx,.xlsm"><div style="margin-top:12px"><button id="processCountries">Process country workbooks</button></div></section>
+    <section class="card"><div class="cap"><span class="dot blue"></span>Step 2</div><h2>Global Data Hub</h2><p>Upload the historical Global DMMM Tracker. This MVP reads <b>Global Metrics</b> and proposes current-score values only for direct prepopulation rows. GDM approval is required before proposals become official.</p><input id="trackerFile" type="file" accept=".xlsx,.xlsm"><div style="margin-top:12px"><button class="blue" id="processTracker">Preview Global Tracker</button></div></section>
+  </div>
+  <div class="note"><strong>Score ownership rule</strong>Country self-current and target values are preserved. Global Data Hub can propose and approve <em>current</em> score changes only. Target ratings are never imported, calculated or overwritten.</div>
+  <div id="alert" class="hidden"></div>
+  <section id="portfolio" class="section hidden"><div class="sectionhead"><div><h2>Portfolio Results Report</h2><p>One row per country, business unit and workbook profile in this browser session. All displayed averages are calculated from loaded assessments, not legacy tracker total cells.</p></div><div class="toolbar"><label>BU <select id="buFilter"><option value="all">All</option><option value="cp">Crop Protection</option><option value="seeds">Seeds</option></select></label><label>Validation <select id="statusFilter"><option value="all">All</option><option value="approved">Validated</option><option value="pending">Pending Global data</option><option value="review">Review required</option></select></label><button class="secondary" id="downloadPortfolio">Download XLSX</button></div></div>
+    <div id="kpis" class="kpis"></div><div class="tablewrap"><table class="table"><thead><tr><th>Country / BU</th><th>Profile</th><th>Self current</th><th>Validated current</th><th>Target +1Y</th><th>Target gap</th><th>Prepopulation</th><th>Validation</th><th></th></tr></thead><tbody id="portfolioRows"></tbody></table></div></section>
+  <section id="detail" class="detail hidden"></section>
+</main>
+<script>
+const CAPS={DMS:{name:'Digital Marketing Strategy',rows:[5,6,7,8,9,10,11,12,13]},CONTENT:{name:'Content Marketing',rows:[14,15,16,17,18,19,20,21,22,23,24]},PAID_MEDIA:{name:'Paid Digital Media',rows:[25,26,27,28,29,30,31,32,33,34,35,36]},SOCIAL:{name:'Social Media',rows:[37,38,39,40,41,42,43,44,45,46]},INFLUENCER:{name:'Influencer Marketing & Partnership',rows:[47,48,49,50,51]},UX:{name:'UX / Web Design / Mobile',rows:[52,53,54,55,56,57,58,59,60]},SEO:{name:'Search Engine Optimization (SEO)',rows:[61,62,63,64,65,66,67,68,69,70,71]},DATA_ANALYTICS:{name:'Data & Analytics',rows:[72,73,74,75,76,77,78,79,80]},MARKETING_AUTO:{name:'Marketing Automation',rows:[81,82,83,84,85,86,87,88,89,90]}};
+const PREPOP={13:['DMS Completion','Global Metrics / DMS completion'],23:['Canva Usage','Global Metrics / Canva'],24:['Trinity Usage','Global Metrics / Trinity'],46:['Emplifi Usage','Global Metrics / Emplifi'],60:['Web Performance & Accessibility','Lighthouse + CWV export required'],69:['Technical SEO Health Score','Global Metrics / SEMrush'],70:['Core Web Vitals & Page Experience','GSC / CrUX export required'],71:['Schema Validity Score','Schema crawl export required'],89:['Marketing Capabilities within Marketing Cloud','Global Metrics / Marketing Cloud / MessageBird'],90:['List Health & Deliverability','SFMC / Bird deliverability export required']};
+const TRACKER_MAP={'DMS Score Yes = 4, No =0':{row:13,mode:'direct'},'Canva':{row:23,mode:'direct'},'Trinity':{row:24,mode:'direct'},'Emplifi':{row:46,mode:'direct'},'SEMrush score':{row:69,mode:'semrush'},'Marketing Cloud/Message Bird':{row:89,mode:'direct'}};
+let assessments={}, proposals={}, selectedKey=null;
+const $=id=>document.getElementById(id); const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[c]));
+function countryKey(v){return String(v??'').trim().toLowerCase().replace(/türkiye|turkiye/g,'turkey').replace(/\*\s*$/,'').replace(/\s+new\s+2026$/,'').replace(/\s+(seed|seeds)$/,'').replace(/\s*-\s*seed$/,'').replace(/[^a-z0-9]/g,'')}
+function buKey(v){let x=String(v??'').trim().toLowerCase();return x==='crop protection'||x==='cp'?'cp':(x==='seed'||x==='s'||x==='seeds'?'seeds':x)}
+function key(c,b){return countryKey(c)+'|'+buKey(b)} function normScore(v){if(v===undefined||v===null||String(v).trim()==='')return null;let m=String(v).trim().match(/^([0-4])(?:\s*(?:-|\(|:).*)?$/);return m?Number(m[1]):null} function num(v){let x=Number(String(v??'').replace(',','.'));return Number.isFinite(x)?x:null}
+function message(html,type='info'){let el=$('alert');el.className='alert '+type;el.innerHTML=html;el.classList.remove('hidden')}
+function cell(sheet,addr){return sheet[addr]?.v} function validHeader(sheet){let exp={B4:'Capability',C4:'Skill',K4:'Self-rating',L4:'Target Rating +1 years',M4:'Comments',P4:'Weighting'};return Object.entries(exp).filter(([c,v])=>String(cell(sheet,c)??'').trim()!==v).map(([c,v])=>`${c} expected “${v}”`)}
+function parseCountry(file,wb){let q=wb.Sheets['DMMM Questionnaire']; if(!q)throw Error('Missing required sheet “DMMM Questionnaire”.'); let headerErrors=validHeader(q);if(headerErrors.length)throw Error('Template mismatch: '+headerErrors.join('; '));let su=wb.Sheets['Sign-up'];if(!su)throw Error('Missing required sheet “Sign-up”.');let country=cell(su,'D7')||file.name.replace(/\.[^.]+$/,'');let bu=cell(su,'D9')||'Unassigned';let data={key:key(country,bu),country:String(country).trim(),bu:String(bu).trim(),submitter:cell(su,'D5')||'Unassigned',assessmentDate:cell(su,'D11')||'',reviewDate:cell(su,'D13')||'',profile:String(cell(q,'R4')||'').includes('Reviewer Notes (AMEA)')?'AMEA':'Global',fileName:file.name,skills:{},errors:[],warnings:[]};for(let r=5;r<=90;r++){let skill=cell(q,'C'+r);if(!skill){data.errors.push(`C${r}: Missing expected skill name.`);continue}let p=cell(q,'P'+r), included; if(String(p).trim()==='1')included=true; else if(String(p).trim()==='0')included=false; else {included=false;data.errors.push(`P${r}: use 1 or 0, found “${p??''}”.`)} let self=normScore(cell(q,'K'+r)),target=normScore(cell(q,'L'+r));if(included&&self===null)data.errors.push(`K${r} (${skill}): current self-rating is missing or invalid.`);if(included&&target===null)data.warnings.push(`L${r} (${skill}): country target is missing or invalid.`);data.skills[r]={row:r,name:String(skill),included,self,target,comments:cell(q,'M'+r)||'',reviewerNotes:cell(q,'R'+r)||''}} return data}
+function trackerProposal(raw,mode){if(mode==='direct'){let v=normScore(raw);return v===null?null:{score:v,reason:'Direct Global Metrics score'}}let h=num(raw);if(h===null||h<0||h>100)return null;return {score:h<40?0:h<60?1:h<75?2:3,reason:`SEMrush health ${h}; proposed L${h<40?'0':h<60?'1':h<75?'2':'3'}. L4 is never inferred without CWV and critical-issue evidence.`}}
+function parseTracker(file,wb){let s=wb.Sheets['Global Metrics'];if(!s)throw Error('Global Tracker requires a “Global Metrics” sheet.');let rows=XLSX.utils.sheet_to_json(s,{header:1,defval:null});let headers=rows[2]||[];let idx={};headers.forEach((h,i)=>idx[String(h??'').trim()]=i);let required=Object.keys(TRACKER_MAP);let miss=required.filter(h=>idx[h]===undefined);if(miss.length)throw Error('Global Metrics mapping missing: '+miss.join(', '));let count=0;rows.slice(3).forEach((row,n)=>{let region=row[0],bu=row[1],country=row[2];if(!country||!bu)return;let k=key(country,bu);Object.entries(TRACKER_MAP).forEach(([header,rule])=>{let raw=row[idx[header]],candidate=trackerProposal(raw,rule.mode);if(candidate){proposals[k]??={};proposals[k][rule.row]={...candidate,raw,sourceFile:file.name,sourceSheet:'Global Metrics',sourceRow:n+4,approved:false};count++}})});return count}
+function result(a){let caps={}, cur=[], val=[], tgt=[], pending=0,review=0,approved=0;for(let [id,cap] of Object.entries(CAPS)){let ss=[],vs=[],ts=[],bad=false;cap.rows.forEach(r=>{let s=a.skills[r];if(!s?.included)return;if(s.self===null)bad=true;else ss.push(s.self);if(s.target!==null)ts.push(s.target);let p=proposals[a.key]?.[r];if(PREPOP[r]){if(!p)pending++; else if(p.approved){approved++;if(s.self!==null&&s.self!==p.score)review++;} }let current=p?.approved?p.score:s.self;if(current!==null)vs.push(current)});let sm=!bad&&ss.length?avg(ss):null, vm=!bad&&vs.length===ss.length?avg(vs):null,tm=!bad&&ts.length===ss.length?avg(ts):null;caps[id]={...cap,self:sm,validated:vm,target:tm,gap:vm!==null&&tm!==null?tm-vm:null};if(sm!==null)cur.push(sm);if(vm!==null)val.push(vm);if(tm!==null)tgt.push(tm)}let self=cur.length===9?avg(cur):null,validated=val.length===9?avg(val):null,target=tgt.length===9?avg(tgt):null;let state=a.errors.length?'blocked':(pending?'pending':(review?'review':'approved'));return {caps,self,validated,target,gap:validated!==null&&target!==null?target-validated:null,pending,review,approved,state}}
+function avg(a){return a.reduce((x,y)=>x+y,0)/a.length} function fmt(x){return x===null||x===undefined?'—':Number(x).toFixed(2)}function status(state){return state==='approved'?'<span class="status s-ok">Validated</span>':state==='pending'?'<span class="status s-pending">Pending Global data</span>':state==='review'?'<span class="status s-review">Review required</span>':'<span class="status s-review">Blocked input</span>'}
+function visible(){let bu=$('buFilter').value,st=$('statusFilter').value;return Object.values(assessments).filter(a=>{let r=result(a);return (bu==='all'||buKey(a.bu)===bu)&&(st==='all'||r.state===st)})}
+function renderPortfolio(){let all=visible();if(!Object.keys(assessments).length)return;$('portfolio').classList.remove('hidden');let valid=all.map(result).filter(x=>x.validated!==null), benchmark=valid.length?avg(valid.map(x=>x.validated)):null;let pending=all.reduce((n,a)=>n+result(a).pending,0);$('kpis').innerHTML=[['Loaded assessments',all.length,'Current filter'],['Validated average',fmt(benchmark),`Eligible validated records, n=${valid.length}`],['Pending Global data',pending,'Required prepopulated skills'],['Review required',all.filter(a=>result(a).review).length,'Assessment records'],['Blocked',all.filter(a=>result(a).state==='blocked').length,'Input validation errors']].map(x=>`<div class="kpi"><div class="label">${x[0]}</div><div class="value">${x[1]}</div><div class="small">${x[2]}</div></div>`).join('');$('portfolioRows').innerHTML=all.length?all.map(a=>{let r=result(a),gap=r.gap===null?'Self gap pending validation':`${r.gap>=0?'+':''}${fmt(r.gap)}`;return `<tr><td><b>${esc(a.country)}</b><br><span style="color:var(--muted)">${esc(a.bu)}</span></td><td>${esc(a.profile)}</td><td class="number">${fmt(r.self)}</td><td class="number">${fmt(r.validated)}</td><td class="number">${fmt(r.target)}</td><td class="number">${gap}</td><td class="number">${r.approved}/${Object.keys(PREPOP).length} approved<br><span style="color:var(--amber)">${r.pending} pending</span></td><td>${status(r.state)}</td><td><button class="secondary" onclick="showDetail('${a.key}')">View</button></td></tr>`}).join(''):'<tr><td colspan="9" class="no-data">No assessments match the selected filters.</td></tr>'}
+function showDetail(k){selectedKey=k;let a=assessments[k],r=result(a),prop=proposals[k]||{};let capRows=Object.entries(r.caps).map(([id,c])=>`<div class="metricrow"><div><b>${esc(c.name)}</b><div class="bar"><span style="width:${Math.max(0,(c.validated??0)/4*100)}%"></span></div></div><div class="number">Self ${fmt(c.self)}<br>Validated <b>${fmt(c.validated)}</b><br>Target ${fmt(c.target)}</div></div>`).join('');let preRows=Object.entries(PREPOP).map(([row,meta])=>{let s=a.skills[row],p=prop[row],state=!p?'Pending Global data':p.approved?(s.self!==p.score?'Approved · discrepancy logged':'Approved'):'Proposed · GDM approval needed';let cl=!p?'s-pending':p.approved?'s-ok':'s-neutral';return `<tr><td>${row}</td><td><b>${esc(meta[0])}</b><br><span style="color:var(--muted)">${esc(meta[1])}</span></td><td class="number">${fmt(s?.self)}</td><td class="number">${p?fmt(p.score):'—'}</td><td>${p?esc(p.sourceFile)+' · row '+p.sourceRow:'—'}</td><td><span class="status ${cl}">${esc(state)}</span></td></tr>`}).join('');let candidates=Object.values(prop).filter(p=>!p.approved).length;$('detail').innerHTML=`<div class="card"><div class="detailtop"><div><div class="eyebrow">Country assessment</div><h2>${esc(a.country)} · ${esc(a.bu)}</h2><p style="color:var(--muted);margin:4px 0 0;font-size:12px">${esc(a.fileName)} · Submitted by ${esc(a.submitter)} · ${esc(a.profile)} profile</p></div><div>${status(r.state)} ${candidates?`<button class="warning" onclick="approveProposals('${a.key}')">Approve ${candidates} GDM proposal${candidates===1?'':'s'}</button>`:''}</div></div><div class="kpis"><div class="kpi"><div class="label">Self current</div><div class="value">${fmt(r.self)}</div></div><div class="kpi"><div class="label">Validated current</div><div class="value">${fmt(r.validated)}</div></div><div class="kpi"><div class="label">Country target +1Y</div><div class="value">${fmt(r.target)}</div></div><div class="kpi"><div class="label">Target gap</div><div class="value">${r.gap===null?'—':(r.gap>=0?'+':'')+fmt(r.gap)}</div></div><div class="kpi"><div class="label">Global status</div><div class="value">${r.pending}</div><div class="small">pending rows</div></div></div><div class="twocol"><div><h3>Capability results</h3><div class="card" style="margin-top:9px">${capRows}</div><p class="caption">Validated current uses approved GDM current-score records where available. Target stays country-owned.</p></div><div><h3>Global-managed / prepopulated skills</h3><div class="tablewrap" style="margin-top:9px"><table class="table"><thead><tr><th>Row</th><th>Skill / expected source</th><th>Self</th><th>GDM current</th><th>Provenance</th><th>Status</th></tr></thead><tbody>${preRows}</tbody></table></div></div></div></div>`;$('detail').classList.remove('hidden');$('detail').scrollIntoView({behavior:'smooth',block:'start'})}
+function approveProposals(k){let count=0;Object.values(proposals[k]||{}).forEach(p=>{if(!p.approved){p.approved=true;count++}});message(`<b>${count} GDM proposal${count===1?'':'s'} approved for the current browser session.</b> The original country submission and all target values remain unchanged. Persistent audit records will be added in the server-backed release.`,'info');renderPortfolio();showDetail(k)}
+async function read(file){return XLSX.read(await file.arrayBuffer(),{type:'array',cellFormula:false,cellText:true})}
+$('processCountries').onclick=async()=>{let files=[...$('countryFiles').files];if(!files.length)return message('Select at least one completed country workbook.','warning');let done=[],bad=[];for(let f of files){try{let a=parseCountry(f,await read(f));assessments[a.key]=a;done.push(`${a.country} / ${a.bu}`)}catch(e){bad.push(`${f.name}: ${e.message}`)}}message(`<b>${done.length} workbook(s) processed.</b> ${done.length?esc(done.join(', ')):''}${bad.length?'<br><b>Blocked:</b> '+esc(bad.join(' | ')):''}`,bad.length?'warning':'info');renderPortfolio()}
+$('processTracker').onclick=async()=>{let f=$('trackerFile').files[0];if(!f)return message('Select the Global DMMM Tracker workbook.','warning');try{let n=parseTracker(f,await read(f));message(`<b>Global Tracker preview created:</b> ${n} current-score proposal(s) mapped from Global Metrics. They remain unapproved until a GDM user approves proposals for a loaded country. Rows 60, 70, 71 and 90 still require their dedicated source exports.`,'info');renderPortfolio();if(selectedKey)showDetail(selectedKey)}catch(e){message(`<b>Global Tracker import blocked:</b> ${esc(e.message)}`,'error')}}
+$('buFilter').onchange=renderPortfolio;$('statusFilter').onchange=renderPortfolio;$('downloadPortfolio').onclick=()=>{let rows=visible().map(a=>{let r=result(a);return {Region:'Not assigned',Country:a.country,'Business Unit':a.bu,Profile:a.profile,'Self Current':r.self,'Validated Current':r.validated,'Country Target +1Y':r.target,'Validated Target Gap':r.gap,'Prepopulated Approved':r.approved,'Pending Global Data':r.pending,'Review Required':r.review,'Validation Status':r.state,'Source Workbook':a.fileName}});let wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),'Portfolio Results');XLSX.writeFile(wb,'DMMM_2026_Portfolio_Results.xlsx')}
+window.showDetail=showDetail;window.approveProposals=approveProposals;
+</script>
+</body></html>
