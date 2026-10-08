@@ -1,49 +1,22 @@
-# DMMM 2026 Results Engine
+# DMMM 2026 Results Engine - Sprint 2 Foundation
 
-## MVP scope
+Batch ingestion and tracker generation for DMMM 2026 country workbooks.
 
-This release supports:
+## Principles
+- Country source workbooks are read-only inputs. This tool never overwrites them.
+- Current self-ratings and +1Y targets are stored separately. Global validation may only affect current-rating proposals.
+- Overall score is the unweighted mean of the nine capability scores. A capability is the mean of included (`P=1`) valid skill scores.
+- A missing included current score blocks finalisation; `P=0` skills are excluded from both numerator and denominator.
 
-- Country DMMM 2026 `.xlsx` / `.xlsm` workbook parsing.
-- Deterministic calculation from `DMMM Questionnaire!K`, `L`, and `P` only.
-- P=0 exclusion from both numerator and denominator.
-- Separate self current, approved Global current, and country target values.
-- Global Tracker 2025 `Global Metrics` preview import for rows 13, 23, 24, 46, 69 and 89.
-- SEMrush Health Score mapping for row 69, capped at proposed Level 3 because Level 4 requires separate CWV and critical-issue evidence.
-- Browser-session portfolio report with XLSX export.
-
-## Important scoring rules
-
-- The country workbook is immutable input.
-- GDM can approve current-score proposals only.
-- Targets are country-owned and are never populated, calculated, or overwritten by Global Data Hub.
-- The overall score is the equal-weight average of the 9 capability scores.
-- Legacy workbook formulas/macros are never executed or used as the authoritative score source.
-- The static GitHub Pages UI is a functional MVP, not a secure persistent production service. Its session data is cleared on page refresh.
-
-## Running the API locally
-
-```bash
+## Run
+```powershell
 python -m pip install -r requirements.txt
-uvicorn dmmm_engine.api:app --reload --port 8000
-pytest -q
+python -m pytest -v
+python -m dmmm_engine.cli --input-folder .\sample_submissions --output .\output\DMMM_2026_Global_Results_Tracker.xlsx
 ```
 
-Endpoints:
-
-- `POST /api/v1/assessments/calculate`
-- `POST /api/v1/global-data/global-tracker/preview`
-- `GET /health`
-
-## Required production work
-
-1. PostgreSQL persistence, immutable source-file storage, SSO, roles and audit events.
-2. Country Alias Master to map source variants, such as `Turkey*`, `TURKIYE`, and `TR - CP`, to a stable country ID.
-3. Dedicated ingestion profiles for Lighthouse/CWV, GSC, schema validation and SFMC/Bird deliverability sources.
-4. GDM approval workflow with reviewer, rationale and timestamp.
-5. Generated GDM Validated workbook, PDF and PowerPoint outputs.
-6. Versioned 2026 model configuration, including resolution of the 10-versus-11 SEO-skill discrepancy.
-
-## Next step
-
-Deploy the static MVP to GitHub Pages, then move the API and persistent Global Data Hub to an authenticated internal hosting environment before real country data is processed.
+## Sprint 2 scope
+- Detect Europe, AMEA, South Korea, Russia and Iran profiles from workbook characteristics.
+- Batch parse country workbooks, retain country/BU/year identity, and report validation issues.
+- Generate a 2026 tracker with Results, regional views, Intake Log and Validation Queue.
+- Global Metrics mapping and final GDM approval are deliberately configuration-driven placeholders until 2026 thresholds are approved.

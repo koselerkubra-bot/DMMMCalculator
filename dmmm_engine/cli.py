@@ -1,28 +1,11 @@
-"""
-CLI Tool for DMMM 2026 Engine
-Usage: python -m dmmm_engine.cli <path_to_workbook.xlsm>
-"""
-
-import sys
-import json
+import argparse
 from pathlib import Path
-from dmmm_engine.core import DMMMEngine
-
-def main():
-    if len(sys.argv) < 2:
-        print("Usage: python -m dmmm_engine.cli <path_to_workbook.xlsx/.xlsm>")
-        sys.exit(1)
-
-    file_path = Path(sys.argv[1])
-    if not file_path.exists():
-        print(f"Error: File not found at '{file_path}'")
-        sys.exit(1)
-
-    with open(file_path, "rb") as f:
-        file_bytes = f.read()
-
-    results = DMMMEngine.parse_and_calculate(file_bytes, filename=file_path.name)
-    print(json.dumps(results, indent=2, ensure_ascii=False))
-
-if __name__ == "__main__":
-    main()
+from .core import parse_batch, build_tracker
+p=argparse.ArgumentParser(description='Generate DMMM 2026 tracker from country workbooks')
+p.add_argument('--input-folder',required=True); p.add_argument('--output',required=True)
+a=p.parse_args(); submissions,errors=parse_batch(a.input_folder)
+build_tracker(submissions,a.output)
+print(f'Created {a.output}: {len(submissions)} submissions, {len(errors)} unreadable files')
+for file,error in errors: print(f'ERROR {file}: {error}')
+for s in submissions:
+ for issue in s.issues: print(f'WARNING {s.source_file}: {issue}')

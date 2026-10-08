@@ -1,12 +1,5 @@
 __pycache__/
-*.py[cod]
-*$py.class
 .pytest_cache/
-.venv/
-env/
-dist/
-build/
-*.egg-info/
-*.xlsm
-*.xlsx
-!tests/fixtures/*.xlsx
+*.py[cod]
+.env
+output/

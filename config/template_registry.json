@@ -1,0 +1,10 @@
+{
+  "version": "2026.1",
+  "profiles": {
+    "europe": {"required_sheets": ["Sign-up", "DMMM Questionnaire", "Summary outcome"], "reviewer_column": null},
+    "amea": {"required_sheets": ["Sign-up", "DMMM Questionnaire", "Summary outcome"], "reviewer_column": "Reviewer Notes (AMEA)"},
+    "iran": {"required_sheets": ["Sign-up", "DMMM Questionnaire", "Summary outcome"], "marker": "Google Ads is not available in Iran"},
+    "russia": {"required_sheets": ["Sign-up", "DMMM Questionnaire", "Summary outcome"], "marker": "Russia"},
+    "south_korea": {"required_sheets": ["Sign-up", "DMMM Questionnaire", "Summary outcome"], "marker": "South Korea"}
+  }
+}
