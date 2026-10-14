@@ -110,5 +110,20 @@ test('reading check reproduces the workbook own Summary value', async () => {
 test('a changed questionnaire layout is reported, not silently scored', async () => {
   const s = await parse({ mutate: (wb) => { wb.getWorksheet('DMMM Questionnaire').getCell('C20').value = 'Some other skill'; } });
   assert.equal(s.template_ok, false);
-  assert.ok(s.issues.some((i) => i.code === 'SKILL_MISMATCH' && i.row === 20));
+  assert.ok(s.issues.some((i) => i.code === 'SKILL_MISMATCH' && i.rows.includes(20)));
+  assert.equal(s.issues.filter((i) => i.code === 'SKILL_MISMATCH').length, 1, 'one message, not one per row');
+});
+
+test('a DMMM 2025 workbook is rejected with one clear message', async () => {
+  const s = await parse({ market: 'Argentina', bu: 'Crop Protection', mutate: (wb) => {
+    const q = wb.getWorksheet('DMMM Questionnaire');
+    q.getCell('K4').value = 'Weighting'; q.getCell('L4').value = 'Weighted Rating'; q.getCell('P4').value = null;
+    q.getCell('C10').value = 'MaSE Module';
+  } });
+  assert.equal(s.template_ok, false);
+  const errs = s.issues.filter((i) => i.level === 'error');
+  assert.equal(errs.length, 1);
+  assert.equal(errs[0].code, 'WRONG_TEMPLATE');
+  assert.match(errs[0].message, /DMMM 2025 workbook/);
+  assert.equal(s.skills.length, 0, 'nothing is read from a wrong template');
 });

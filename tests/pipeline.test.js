@@ -191,3 +191,20 @@ test('unknown market is reported with a fix, not guessed', async () => {
   assert.equal(p.compute().length, 0);
   assert.match(p.intakeLog[0].sub.issues[0].message, /Country Alias Master/);
 });
+
+test('wrong-template files never reach Results and never block the valid 2026 file', async () => {
+  const old2025 = { market: 'Argentina', bu: 'Crop Protection', mutate: (wb) => { const q = wb.getWorksheet('DMMM Questionnaire'); q.getCell('K4').value = 'Weighting'; q.getCell('L4').value = 'Weighted Rating'; } };
+  const p = await portfolioWith([['DMMM_2025_ARGENTINA CP.xlsm', old2025], ['DMMM_2026_ARGENTINA CP.xlsm', { market: 'Argentina', bu: 'Crop Protection' }]]);
+  const rows = p.compute();
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].sub.source_file_name, 'DMMM_2026_ARGENTINA CP.xlsm');
+  assert.equal(rows[0].country_status, COUNTRY_STATUS.COMPLETE);
+  assert.equal(p.needsChoice.size, 0, 'a rejected file is not a competing version');
+  assert.equal(p.submissions.length, 2, 'the rejected file stays in the Intake Log');
+  assert.ok(p.changeLog.some((c) => c.type === 'Rejected file' && /DMMM 2025 workbook/.test(c.detail)));
+  const buf = await trackerToBuffer(ExcelJS, p, rows);
+  assert.ok(verifyTracker(buf, rows).ok);
+  const p2 = new Portfolio(cfg);
+  await restoreState(p2, buf, 't.xlsx');
+  assert.equal(p2.compute().length, 1, 'still excluded after a save / reload');
+});

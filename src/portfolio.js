@@ -29,7 +29,7 @@ export class Portfolio {
   }
 
   versionsOf(key) {
-    return this.submissions.filter((s) => s.key === key).sort((a, b) => a.version - b.version);
+    return this.submissions.filter((s) => s.key === key && s.template_ok).sort((a, b) => a.version - b.version);
   }
 
   /** Add one country workbook. Returns the intake entry. */
@@ -44,11 +44,12 @@ export class Portfolio {
       this.intakeLog.push(entry);
       return entry;
     }
-    if (!sub.key) {
+    if (!sub.key || !sub.template_ok) {
       sub.version = 1;
       sub.active_flag = false;
       this.submissions.push(sub);
-      entry.outcome = 'Not added to results - identity could not be resolved';
+      entry.outcome = !sub.template_ok ? 'Not added to results - not a valid DMMM 2026 template' : 'Not added to results - identity could not be resolved';
+      this.log('Rejected file', sub.key || '', `"${fileName}": ${sub.issues.filter((i) => i.level === 'error').map((i) => i.message).join(' | ')}`);
       this.intakeLog.push(entry);
       return entry;
     }
@@ -81,7 +82,7 @@ export class Portfolio {
   }
 
   _syncActiveFlags() {
-    for (const s of this.submissions) s.active_flag = !!s.key && this.active.get(s.key) === s.submission_id && !this.needsChoice.has(s.key);
+    for (const s of this.submissions) s.active_flag = !!s.key && s.template_ok && this.active.get(s.key) === s.submission_id && !this.needsChoice.has(s.key);
   }
 
   async setGlobalMetrics(bytes, fileName, opts = {}) {
@@ -114,7 +115,7 @@ export class Portfolio {
   }
 
   activeSubmissions() {
-    const keys = new Set(this.submissions.filter((s) => s.key).map((s) => s.key));
+    const keys = new Set(this.submissions.filter((s) => s.key && s.template_ok).map((s) => s.key));
     return [...keys].map((key) => ({ key, sub: this.submissions.find((s) => s.submission_id === this.active.get(key)) || null, versions: this.versionsOf(key) }));
   }
 

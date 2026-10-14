@@ -97,25 +97,34 @@ export async function parseCountryWorkbook(bytes, fileName, cfg, resolver, opts 
   // ---- Template structure ---------------------------------------------------------------
   const q = wb.sheet(model.sheets.questionnaire);
   const hr = model.questionnaire_header_row;
+  const headerDiffs = [];
   for (const [col, expected] of Object.entries(model.expected_headers)) {
     const got = q.value(`${col}${hr}`);
-    if (norm(got) !== norm(expected)) {
-      sub.issues.push(issue('error', 'HEADER_MISMATCH', `${model.sheets.questionnaire}!${col}${hr} is "${got ?? ''}", expected "${expected}". The questionnaire layout has changed.`));
-    }
+    if (norm(got) !== norm(expected)) headerDiffs.push(`${col}${hr} is "${got ?? ''}" (expected "${expected}")`);
   }
   const summary = wb.sheet(model.sheets.summary);
   const bounds = capabilityBoundariesFromSummary(summary, model);
   sub.capability_boundaries_source = 'Summary outcome formulas';
   const expected = model.capabilities.map((x) => `${x.first_row}-${x.last_row}`).join(',');
   const got = bounds.map((x) => `${x.first_row}-${x.last_row}`).join(',');
+  const boundaryDiff = bounds.length === 9 && got !== expected;
+  if (headerDiffs.length || boundaryDiff) {
+    const k4 = norm(q.value(`K${hr}`)), l4 = norm(q.value(`L${hr}`));
+    const is2025 = k4 === 'WEIGHTING' && l4 === 'WEIGHTED RATING';
+    const msg = is2025
+      ? `This is a DMMM 2025 workbook. Only the DMMM ${model.assessment_year} template can be scored; the country needs to complete the ${model.assessment_year} file.`
+      : `This workbook does not match the DMMM ${model.assessment_year} template (${[...headerDiffs, ...(boundaryDiff ? [`capability rows ${got}`] : [])].join('; ')}). It was not scored.`;
+    sub.issues.unshift(issue('error', 'WRONG_TEMPLATE', msg, { detected: is2025 ? 'DMMM 2025' : 'unknown' }));
+    sub.template_ok = false;
+    return sub;
+  }
   if (bounds.length !== 9) {
     sub.capability_boundaries_source = 'model config (Summary formulas not found)';
     sub.issues.push(issue('warning', 'SUMMARY_FORMULAS', `Found ${bounds.length} capability formulas in Summary outcome (expected 9); used the configured rows instead.`));
-  } else if (got !== expected) {
-    sub.issues.push(issue('error', 'BOUNDARY_MISMATCH', `Capability rows in Summary outcome (${got}) differ from the 2026 model (${expected}). Update config/model_2026.json before scoring this file.`));
   }
 
   const cols = model.questionnaire_columns;
+  const nameDiffs = [];
   for (const s of model.skills) {
     const nameInFile = q.value(`${cols.skill}${s.row}`);
     const rec = {
@@ -130,9 +139,7 @@ export async function parseCountryWorkbook(bytes, fileName, cfg, resolver, opts 
       comments: q.value(`${cols.comments}${s.row}`) ?? null,
       issues: [],
     };
-    if (norm(nameInFile) !== norm(s.skill)) {
-      sub.issues.push(issue('error', 'SKILL_MISMATCH', `Row ${s.row}: skill is "${nameInFile ?? ''}", expected "${s.skill}"`, { row: s.row }));
-    }
+    if (norm(nameInFile) !== norm(s.skill)) nameDiffs.push({ row: s.row, got: nameInFile ?? '', expected: s.skill });
     const p = parseFlag(rec.inclusion_raw);
     rec.inclusion = p.value;
     if (p.issue) {
@@ -147,6 +154,11 @@ export async function parseCountryWorkbook(bytes, fileName, cfg, resolver, opts 
     if (k.issue && k.issue !== 'missing') rec.issues.push(`self-rating ${k.issue}`);
     if (l.issue && l.issue !== 'missing') rec.issues.push(`target ${l.issue}`);
     sub.skills.push(rec);
+  }
+
+  if (nameDiffs.length) {
+    const shown = nameDiffs.slice(0, 3).map((d) => `row ${d.row} "${d.got}" (expected "${d.expected}")`).join('; ');
+    sub.issues.push(issue('error', 'SKILL_MISMATCH', `${nameDiffs.length} skill name(s) differ from the DMMM ${model.assessment_year} template: ${shown}${nameDiffs.length > 3 ? '; ...' : ''}. The file was not scored.`, { rows: nameDiffs.map((d) => d.row) }));
   }
 
   // ---- General questions (informational) -------------------------------------------------
@@ -171,6 +183,6 @@ export async function parseCountryWorkbook(bytes, fileName, cfg, resolver, opts 
     sub.parse_check = { workbook_cached_overall: null, reproduced: null, match: null };
   }
 
-  sub.template_ok = !sub.issues.some((i) => ['SKILL_MISMATCH', 'BOUNDARY_MISMATCH', 'HEADER_MISMATCH', 'SHEETS_MISSING'].includes(i.code) && i.level === 'error');
+  sub.template_ok = !sub.issues.some((i) => ['SKILL_MISMATCH', 'WRONG_TEMPLATE', 'SHEETS_MISSING'].includes(i.code) && i.level === 'error');
   return sub;
 }

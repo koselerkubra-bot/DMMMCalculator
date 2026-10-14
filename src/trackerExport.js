@@ -8,8 +8,9 @@ import { DECISION_OPTIONS } from './validation.js';
 export const STATE_FORMAT = 'dmmm-tracker-state/1';
 const FONT = 'Arial';
 const C = {
-  ink: 'FF1D2A24', header: 'FF1F4E3D', headerGdm: 'FF234E70', headerHist: 'FF5B6770', headerText: 'FFFFFFFF',
-  title: 'FF1F4E3D', edit: 'FFFFF2CC', ok: 'FFE2F0D9', warn: 'FFFCE9C8', bad: 'FFF8D7D3', info: 'FFDDEBF7', muted: 'FFF2F2F2',
+  // Syngenta palette: Super Green 009F3C, Deep Blue 36398E, Sunlight F4A000, Earth E24A1E, neutrals
+  ink: 'FF1A202C', header: 'FF009F3C', headerGdm: 'FF36398E', headerHist: 'FF64748B', headerText: 'FFFFFFFF',
+  title: 'FF36398E', edit: 'FFFFF4DB', ok: 'FFE6F5EC', warn: 'FFFFF4DB', bad: 'FFFDECE6', info: 'FFEBEBF6', muted: 'FFF4F6F8',
 };
 const STATUS_FILL = {
   'Complete': C.ok, 'Validated': C.info, 'Pending Global Data': C.warn, 'Ready for Global review': C.warn,
@@ -76,14 +77,14 @@ function styleHeader(row, cols) {
     cell.font = { name: FONT, bold: true, size: 9, color: { argb: C.headerText } };
     cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: GROUP_FILL[col?.g] || C.header } };
     cell.alignment = { wrapText: true, vertical: 'middle', horizontal: 'center' };
-    cell.border = { bottom: { style: 'thin', color: { argb: 'FFFFFFFF' } } };
+    cell.border = { right: { style: 'thin', color: { argb: 'FFFFFFFF' } } };
   });
 }
 
 function title(ws, text, sub) {
   ws.getCell('A1').value = text;
   ws.getCell('A1').font = { name: FONT, bold: true, size: 14, color: { argb: C.title } };
-  if (sub) { ws.getCell('A2').value = sub; ws.getCell('A2').font = { name: FONT, size: 9, italic: true, color: { argb: 'FF5B6770' } }; }
+  if (sub) { ws.getCell('A2').value = sub; ws.getCell('A2').font = { name: FONT, size: 9, italic: true, color: { argb: 'FF64748B' } }; }
 }
 
 /** Write a simple table; returns { first, last } data rows. */

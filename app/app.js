@@ -30,6 +30,10 @@ async function init() {
 }
 
 function wire() {
+  const logo = $('#brand-logo');
+  logo.addEventListener('load', () => { logo.hidden = false; $('#brand-divider').hidden = false; });
+  logo.addEventListener('error', () => logo.remove());
+  if (logo.complete && logo.naturalWidth) { logo.hidden = false; $('#brand-divider').hidden = false; }
   const dz = $('#dropzone');
   $('#file-input').addEventListener('change', (e) => { handleFiles([...e.target.files]); e.target.value = ''; });
   dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('over'); });
@@ -98,7 +102,7 @@ async function handleFiles(files) {
       alerts.push({ bad: true, title: `${f.name} could not be processed`, body: `<p>${esc(e.message)}</p>` });
     }
   }
-  if (rejected.length) alerts.unshift({ bad: true, title: `${rejected.length} file${rejected.length === 1 ? ' was' : 's were'} not added to the results`, body: `<ul>${rejected.join('')}</ul><p>Fix the Sign-up sheet (or add the market to the Country Alias Master) and load the file again.</p>` });
+  if (rejected.length) alerts.unshift({ bad: true, title: `${rejected.length} file${rejected.length === 1 ? ' was' : 's were'} not added to the results`, body: `<ul>${rejected.join('')}</ul><p>They are listed in the Intake log. Once corrected, load them again.</p>` });
   $('#busy').hidden = true;
   refresh(alerts);
 }

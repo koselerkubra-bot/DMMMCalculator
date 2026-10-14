@@ -98,7 +98,7 @@ export async function restoreState(portfolio, bytes, fileName) {
     if (sub && sub.key && !portfolio.active.has(sub.key)) portfolio.active.set(sub.key, id);
   }
   for (const key of meta.needs_choice || []) portfolio.needsChoice.add(key);
-  for (const s of portfolio.submissions) if (s.key && !portfolio.active.has(s.key)) portfolio.active.set(s.key, s.submission_id);
+  for (const s of portfolio.submissions) if (s.key && s.template_ok && !portfolio.active.has(s.key)) portfolio.active.set(s.key, s.submission_id);
   portfolio._syncActiveFlags();
   portfolio.changeLog = [...(meta.change_log || []), ...portfolio.changeLog];
   portfolio.metricsImports = [...(meta.metrics_imports || []), ...portfolio.metricsImports];
