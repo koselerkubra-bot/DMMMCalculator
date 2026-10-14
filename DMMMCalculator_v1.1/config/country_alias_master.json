@@ -1,0 +1,1371 @@
+{
+ "version": "2026.1",
+ "note": "Canonical country master. Matching key = country_id + business_unit + assessment_year. Aliases are matched after normalisation (upper case, accents removed, *, NEW 2026, BU suffixes such as Seed/Seeds/CP/-S stripped). Edit this file to add aliases or change regions; every change is versioned in Git.",
+ "regions": {
+  "EUR": "Europe",
+  "AMEA": "Africa, Middle East & Asia",
+  "LATAM": "Latin America",
+  "NA": "North America",
+  "JANZ": "Japan, Australia & New Zealand"
+ },
+ "region_aliases": {
+  "EUR": [
+   "EUR",
+   "EUROPE",
+   "EU"
+  ],
+  "AMEA": [
+   "AMEA"
+  ],
+  "LATAM": [
+   "LATAM",
+   "BRA",
+   "LAS"
+  ],
+  "NA": [
+   "NA",
+   "NORTH AMERICA"
+  ],
+  "JANZ": [
+   "JANZ",
+   "AU/JP",
+   "AUJP",
+   "APAC"
+  ]
+ },
+ "subregions": {
+  "AME": "AME (Africa & Middle East)",
+  "ASIA": "ASIA"
+ },
+ "template_profiles": {
+  "AMEA": "AMEA",
+  "default": "Europe"
+ },
+ "non_country_values": [
+  "ALL COUNTRIES (GLOBAL)",
+  "EU - EUROPEAN UNION",
+  "LAS (AR, UY, CL, PY, BO)"
+ ],
+ "countries": [
+  {
+   "id": "AR",
+   "name": "Argentina",
+   "region": "LATAM",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "AR",
+    "ARG",
+    "ARGENTINA"
+   ],
+   "lighthouse_bu": [
+    "CP"
+   ]
+  },
+  {
+   "id": "AU",
+   "name": "Australia",
+   "region": "JANZ",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "AU",
+    "AUS",
+    "AUSTRALIA"
+   ],
+   "lighthouse_bu": [
+    "CP"
+   ]
+  },
+  {
+   "id": "AT",
+   "name": "Austria",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "AT",
+    "AUSTRIA",
+    "AUT",
+    "OSTERREICH"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "BD",
+   "name": "Bangladesh",
+   "region": "AMEA",
+   "subregion": "ASIA",
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "BANGLADESH",
+    "BD",
+    "BGD"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "BY",
+   "name": "Belarus",
+   "region": "AMEA",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "BELARUS",
+    "BLR",
+    "BY"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "BZ",
+   "name": "Belize",
+   "region": "LATAM",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "BELIZE",
+    "BZ"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "BE",
+   "name": "Belgium",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "BE",
+    "BEL",
+    "BELGIE",
+    "BELGIQUE",
+    "BELGIUM"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "BO",
+   "name": "Bolivia",
+   "region": "LATAM",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "BO",
+    "BOL",
+    "BOLIVIA"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "BR",
+   "name": "Brazil",
+   "region": "LATAM",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "BR",
+    "BR GOLDEN HARVEST",
+    "BR NIDERA",
+    "BRA",
+    "BRASIL",
+    "BRAZIL"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "BG",
+   "name": "Bulgaria",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "BG",
+    "BGR",
+    "BULGARIA"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "CM",
+   "name": "Cameroon",
+   "region": "AMEA",
+   "subregion": "AME",
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "CAMEROON",
+    "CM",
+    "CMR"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "CA",
+   "name": "Canada",
+   "region": "NA",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "CA",
+    "CAN",
+    "CANADA"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "CL",
+   "name": "Chile",
+   "region": "LATAM",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "CHILE",
+    "CHL",
+    "CL"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "CN",
+   "name": "China",
+   "region": "AMEA",
+   "subregion": "ASIA",
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "CHINA",
+    "CHN",
+    "CN"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "CO",
+   "name": "Colombia",
+   "region": "LATAM",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "CO",
+    "COL",
+    "COLOMBIA",
+    "COLUMBIA"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "CAC",
+   "name": "Central America & Caribbean",
+   "region": "LATAM",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "CAC",
+    "CENTRAL AMERICA & CARIBBEAN",
+    "CENTRAL AMERICA AND CARIBBEAN",
+    "CENTRAL AMERICA&CARIBBEAN"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "CR",
+   "name": "Costa Rica",
+   "region": "LATAM",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "COSTA RICA",
+    "COSTA-RICA",
+    "CR"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "HR",
+   "name": "Croatia",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "CROATIA",
+    "HR",
+    "HRV",
+    "HRVATSKA"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "CY",
+   "name": "Cyprus",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "CY",
+    "CYP",
+    "CYPRUS"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "CZ",
+   "name": "Czech Republic",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "CZ",
+    "CZE",
+    "CZECH REP.",
+    "CZECH REPUBLIC",
+    "CZECHIA"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "DK",
+   "name": "Denmark",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "DENMARK",
+    "DK",
+    "DNK"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "DO",
+   "name": "Dominican Republic",
+   "region": "LATAM",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "DO",
+    "DOM",
+    "DOMINICAN REPUBLIC"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "EC",
+   "name": "Ecuador",
+   "region": "LATAM",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "EC",
+    "ECU",
+    "ECUADOR"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "EG",
+   "name": "Egypt",
+   "region": "AMEA",
+   "subregion": "AME",
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "EG",
+    "EGY",
+    "EGYPT"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "SV",
+   "name": "El Salvador",
+   "region": "LATAM",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "EL SALVADOR",
+    "EL-SALVADOR",
+    "SV"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "EE",
+   "name": "Estonia",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "EE",
+    "EST",
+    "ESTONIA"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "FI",
+   "name": "Finland",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "FI",
+    "FIN",
+    "FINLAND"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "FR",
+   "name": "France",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "FR",
+    "FRA",
+    "FRANCE"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "DE",
+   "name": "Germany",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "DACH",
+    "DE",
+    "DEU",
+    "DEUTSCHLAND",
+    "GERMANY"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "GT",
+   "name": "Guatemala",
+   "region": "LATAM",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "GT",
+    "GTM",
+    "GUATEMALA"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "GR",
+   "name": "Greece",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "GR",
+    "GRC",
+    "GREECE",
+    "HELLAS"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "HN",
+   "name": "Honduras",
+   "region": "LATAM",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "HN",
+    "HND",
+    "HONDURAS"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "HU",
+   "name": "Hungary",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "HU",
+    "HUN",
+    "HUNGARY",
+    "MAGYARORSZAG"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "IS",
+   "name": "Iceland",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "ICELAND",
+    "IS",
+    "ISL"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "IN",
+   "name": "India",
+   "region": "AMEA",
+   "subregion": "ASIA",
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "IN",
+    "IND",
+    "INDIA"
+   ],
+   "lighthouse_bu": [
+    "CP"
+   ]
+  },
+  {
+   "id": "ID",
+   "name": "Indonesia",
+   "region": "AMEA",
+   "subregion": "ASIA",
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "ID",
+    "IDN",
+    "INDONESIA"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "IR",
+   "name": "Iran",
+   "region": "AMEA",
+   "subregion": "AME",
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "IR",
+    "IRAN",
+    "IRN",
+    "ISLAMIC REPUBLIC OF IRAN"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "IQ",
+   "name": "Iraq",
+   "region": "AMEA",
+   "subregion": "AME",
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "IQ",
+    "IRAK",
+    "IRAQ",
+    "IRQ"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "IE",
+   "name": "Ireland",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "IE",
+    "IRELAND",
+    "IRL"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "IL",
+   "name": "Israel",
+   "region": "AMEA",
+   "subregion": "AME",
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "IL",
+    "ISR",
+    "ISRAEL"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "IT",
+   "name": "Italy",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "IT",
+    "ITA",
+    "ITALIA",
+    "ITALY"
+   ],
+   "lighthouse_bu": [
+    "CP"
+   ]
+  },
+  {
+   "id": "CI",
+   "name": "Ivory Coast",
+   "region": "AMEA",
+   "subregion": "AME",
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "CI",
+    "CIV",
+    "COTE D IVOIRE",
+    "IVORY COAST",
+    "IVORY-COAST"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "JM",
+   "name": "Jamaica",
+   "region": "LATAM",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "JAM",
+    "JAMAICA",
+    "JM"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "JP",
+   "name": "Japan",
+   "region": "JANZ",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "JAPAN",
+    "JP",
+    "JPN"
+   ],
+   "lighthouse_bu": [
+    "CP"
+   ]
+  },
+  {
+   "id": "KZ",
+   "name": "Kazakhstan",
+   "region": "AMEA",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "KAZ",
+    "KAZAKHSTAN",
+    "KZ"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "KE",
+   "name": "Kenya",
+   "region": "AMEA",
+   "subregion": "AME",
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "KE",
+    "KEN",
+    "KENYA"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "KR",
+   "name": "South Korea",
+   "region": "AMEA",
+   "subregion": "ASIA",
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "KOR",
+    "KOREA",
+    "KOREA SOUTH",
+    "KOREA-SOUTH",
+    "KR",
+    "REPUBLIC OF KOREA",
+    "SOUTH KOREA"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "LV",
+   "name": "Latvia",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "LATVIA",
+    "LV",
+    "LVA"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "LT",
+   "name": "Lithuania",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "LITHUANIA",
+    "LT",
+    "LTU"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "LU",
+   "name": "Luxembourg",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "LU",
+    "LUX",
+    "LUXEMBOURG"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "MW",
+   "name": "Malawi",
+   "region": "AMEA",
+   "subregion": "AME",
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "MALAWI",
+    "MW",
+    "MWI"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "MY",
+   "name": "Malaysia",
+   "region": "AMEA",
+   "subregion": "ASIA",
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "MALAYSIA",
+    "MY",
+    "MYS"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "MT",
+   "name": "Malta",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "MALTA",
+    "MLT",
+    "MT"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "MX",
+   "name": "Mexico",
+   "region": "LATAM",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "MEX",
+    "MEXICO",
+    "MX"
+   ],
+   "lighthouse_bu": [
+    "CP"
+   ]
+  },
+  {
+   "id": "MD",
+   "name": "Moldova",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "MD",
+    "MDA",
+    "MOLDOVA"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "MA",
+   "name": "Morocco",
+   "region": "AMEA",
+   "subregion": "AME",
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "MA",
+    "MAR",
+    "MAROC",
+    "MOROCCO"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "MZ",
+   "name": "Mozambique",
+   "region": "AMEA",
+   "subregion": "AME",
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "MOZ",
+    "MOZAMBIQUE",
+    "MZ"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "NL",
+   "name": "Netherlands",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "HOLLAND",
+    "NETHERLANDS",
+    "NL",
+    "NLD",
+    "THE NETHERLANDS"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "NZ",
+   "name": "New Zealand",
+   "region": "JANZ",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "NEW ZEALAND",
+    "NZ",
+    "NZL"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "NI",
+   "name": "Nicaragua",
+   "region": "LATAM",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "NI",
+    "NIC",
+    "NICARAGUA"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "NORDICS",
+   "name": "Nordics",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "NORDIC",
+    "NORDICS",
+    "NORDICS CP & S"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "NO",
+   "name": "Norway",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "NO",
+    "NOR",
+    "NORWAY"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "PK",
+   "name": "Pakistan",
+   "region": "AMEA",
+   "subregion": "AME",
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "PAK",
+    "PAKISTAN",
+    "PK"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "PA",
+   "name": "Panama",
+   "region": "LATAM",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "PA",
+    "PAN",
+    "PANAMA"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "PY",
+   "name": "Paraguay",
+   "region": "LATAM",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "PARAGUAY",
+    "PRY",
+    "PY"
+   ],
+   "lighthouse_bu": [
+    "CP"
+   ]
+  },
+  {
+   "id": "PE",
+   "name": "Peru",
+   "region": "LATAM",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "PE",
+    "PER",
+    "PERU"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "PH",
+   "name": "Philippines",
+   "region": "AMEA",
+   "subregion": "ASIA",
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "PH",
+    "PHILIPPINES",
+    "PHL"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "PL",
+   "name": "Poland",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "PL",
+    "POL",
+    "POLAND",
+    "POLSKA"
+   ],
+   "lighthouse_bu": [
+    "CP"
+   ]
+  },
+  {
+   "id": "PT",
+   "name": "Portugal",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "PORTUGAL",
+    "PRT",
+    "PT"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "QA",
+   "name": "Qatar",
+   "region": "AMEA",
+   "subregion": "AME",
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "QA",
+    "QAT",
+    "QATAR"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "RO",
+   "name": "Romania",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "RO",
+    "ROM",
+    "ROMANIA",
+    "ROU"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "RU",
+   "name": "Russia",
+   "region": "AMEA",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "RU",
+    "RUS",
+    "RUSSIA",
+    "RUSSIAN FEDERATION"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "SA",
+   "name": "Saudi Arabia",
+   "region": "AMEA",
+   "subregion": "AME",
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "KSA",
+    "SA",
+    "SAU",
+    "SAUDI ARABIA"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "RS",
+   "name": "Serbia",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "RS",
+    "SERBIA",
+    "SERBIA REP.",
+    "SRB"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "SK",
+   "name": "Slovakia",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "SK",
+    "SLOVAKIA",
+    "SVK"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "SI",
+   "name": "Slovenia",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "SI",
+    "SLOVENIA",
+    "SVN"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "ZA",
+   "name": "South Africa",
+   "region": "AMEA",
+   "subregion": "AME",
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "RSA",
+    "SOUTH AFRICA",
+    "SOUTH-AFRICA",
+    "ZA",
+    "ZAF"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "ES",
+   "name": "Spain",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "ES",
+    "ESP",
+    "ESPANA",
+    "IB",
+    "IBERIA",
+    "SPAIN"
+   ],
+   "lighthouse_bu": [
+    "CP"
+   ]
+  },
+  {
+   "id": "LK",
+   "name": "Sri Lanka",
+   "region": "AMEA",
+   "subregion": "ASIA",
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "LK",
+    "LKA",
+    "SRI LANKA",
+    "SRI-LANKA"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "SE",
+   "name": "Sweden",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "SE",
+    "SWE",
+    "SWEDEN"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "CH",
+   "name": "Switzerland",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "CH",
+    "CHE",
+    "SCHWEIZ",
+    "SUISSE",
+    "SWITZERLAND"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "TW",
+   "name": "Taiwan",
+   "region": "AMEA",
+   "subregion": "ASIA",
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "TAIWAN",
+    "TW",
+    "TWN"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "TZ",
+   "name": "Tanzania",
+   "region": "AMEA",
+   "subregion": "AME",
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "TANZANIA",
+    "TZ",
+    "TZA"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "TH",
+   "name": "Thailand",
+   "region": "AMEA",
+   "subregion": "ASIA",
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "TH",
+    "THA",
+    "THAILAND"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "TR",
+   "name": "Turkey",
+   "region": "AMEA",
+   "subregion": "AME",
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "TR",
+    "TUR",
+    "TURKEY",
+    "TURKIYE",
+    "TÜRKIYE",
+    "TÜRKİYE"
+   ],
+   "lighthouse_bu": [
+    "CP"
+   ]
+  },
+  {
+   "id": "TN",
+   "name": "Tunisia",
+   "region": "AMEA",
+   "subregion": "AME",
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "TN",
+    "TUN",
+    "TUNISIA"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "AE",
+   "name": "UAE",
+   "region": "AMEA",
+   "subregion": "AME",
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "AE",
+    "ARE",
+    "UAE",
+    "UNITED ARAB EMIRATES"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "UA",
+   "name": "Ukraine",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "UA",
+    "UKR",
+    "UKRAINE"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "GB",
+   "name": "United Kingdom",
+   "region": "EUR",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "GB",
+    "GBR",
+    "GREAT BRITAIN",
+    "UK",
+    "UNITED KINGDOM",
+    "UNITED KINGDOM (UK)"
+   ],
+   "lighthouse_bu": [
+    "CP"
+   ]
+  },
+  {
+   "id": "UY",
+   "name": "Uruguay",
+   "region": "LATAM",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "URUGUAY",
+    "URY",
+    "UY"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "US",
+   "name": "United States",
+   "region": "NA",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "UNITED STATES",
+    "UNITED STATES OF AMERICA",
+    "US",
+    "USA"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "UZ",
+   "name": "Uzbekistan",
+   "region": "AMEA",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "UZ",
+    "UZB",
+    "UZBEKISTAN"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "VN",
+   "name": "Vietnam",
+   "region": "AMEA",
+   "subregion": "ASIA",
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "VIET NAM",
+    "VIETNAM",
+    "VN",
+    "VNM"
+   ],
+   "lighthouse_bu": [
+    "CP"
+   ]
+  },
+  {
+   "id": "VE",
+   "name": "Venezuela",
+   "region": "LATAM",
+   "subregion": null,
+   "region_source": "assumed - please confirm",
+   "aliases": [
+    "VE",
+    "VEN",
+    "VENEZUELA"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "ZM",
+   "name": "Zambia",
+   "region": "AMEA",
+   "subregion": "AME",
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "ZAMBIA",
+    "ZM",
+    "ZMB"
+   ],
+   "lighthouse_bu": []
+  },
+  {
+   "id": "ZW",
+   "name": "Zimbabwe",
+   "region": "AMEA",
+   "subregion": null,
+   "region_source": "2025 tracker / metrics",
+   "aliases": [
+    "ZIMBABWE",
+    "ZW",
+    "ZWE"
+   ],
+   "lighthouse_bu": []
+  }
+ ]
+}

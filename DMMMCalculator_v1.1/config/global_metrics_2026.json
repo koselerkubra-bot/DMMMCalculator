@@ -1,0 +1,151 @@
+{
+  "version": "2026.1",
+  "note": "Maps columns of the Global Metrics file (2025 'All Global Metrics' layout, extended for 2026) to the GDM-managed questionnaire rows. Values in level columns are GDM-assessed maturity levels (0-4) and are used as-is (decimals allowed, as in 2025). Raw columns are re-scored with threshold_config and any difference is reported as a validation conflict. Add aliases here if the column headers change.",
+  "identity_columns": {
+    "region": 1,
+    "business_unit": 2,
+    "market": 3
+  },
+  "header_detection": {
+    "must_contain_any": [
+      "Canva",
+      "Emplifi",
+      "Trinity"
+    ]
+  },
+  "not_applicable_values": [
+    "NA",
+    "N/A",
+    "N.A.",
+    "NOT APPLICABLE",
+    "-"
+  ],
+  "skills": [
+    {
+      "row": 13,
+      "skill": "DMS Completion",
+      "column": "DMS Score",
+      "aliases": [
+        "DMS Score Yes = 4, No =0",
+        "DMS Completion",
+        "DMS"
+      ],
+      "allowed_levels": [
+        0,
+        4
+      ],
+      "level4_verified_by_source": true,
+      "level4_note": "DMS Completion is binary (Yes = 4, No = 0) and the value is GDM's own record of a completed DMS, so a 4 counts as Global-verified. Set to false to require reviewer approval."
+    },
+    {
+      "row": 23,
+      "skill": "Canva Usage",
+      "column": "Canva",
+      "aliases": [
+        "Canva Usage",
+        "Canva Use"
+      ]
+    },
+    {
+      "row": 24,
+      "skill": "Trinity Usage",
+      "column": "Trinity",
+      "aliases": [
+        "Trinity Usage",
+        "Trinity Use"
+      ]
+    },
+    {
+      "row": 46,
+      "skill": "Emplifi Usage",
+      "column": "Emplifi",
+      "aliases": [
+        "Emplifi Usage"
+      ]
+    },
+    {
+      "row": 60,
+      "skill": "Web Performance & Accessibility",
+      "column": "Web Performance & Accessibility",
+      "aliases": [
+        "Web Performance",
+        "Lighthouse / Accessibility"
+      ],
+      "new_in_2026": true
+    },
+    {
+      "row": 69,
+      "skill": "Technical SEO Health Score",
+      "column": "SEO",
+      "aliases": [
+        "Technical SEO Health Score",
+        "SEO Level"
+      ],
+      "raw_column": "SEMrush score",
+      "raw_aliases": [
+        "SEMrush",
+        "SEM Rush score",
+        "SEMrush Health Score"
+      ],
+      "threshold": "technical_seo_health"
+    },
+    {
+      "row": 70,
+      "skill": "Core Web Vitals & Page Experience",
+      "column": "Core Web Vitals & Page Experience",
+      "aliases": [
+        "Core Web Vitals",
+        "CWV"
+      ],
+      "new_in_2026": true
+    },
+    {
+      "row": 71,
+      "skill": "Schema Validity Score",
+      "column": "Schema Validity Score",
+      "aliases": [
+        "Schema Validity",
+        "Schema"
+      ],
+      "new_in_2026": true
+    },
+    {
+      "row": 89,
+      "skill": "Marketing Capabilities within Marketing Cloud",
+      "column": "Marketing Cloud/Message Bird",
+      "aliases": [
+        "Marketing Cloud / Message Bird",
+        "Marketing Capabilities within Marketing Cloud",
+        "Marketing Cloud"
+      ]
+    },
+    {
+      "row": 90,
+      "skill": "List Health & Deliverability",
+      "column": "List Health & Deliverability",
+      "aliases": [
+        "List Health",
+        "Deliverability"
+      ],
+      "new_in_2026": true
+    }
+  ],
+  "informational_columns": [
+    "SFDC/ GC",
+    "Global Campaign Dashboard",
+    "% Grower data",
+    "Cropwise active users  AMEA Only",
+    "GA4 Property audit"
+  ],
+  "level4_verification": {
+    "column_suffix": " L4 Verified",
+    "accepted_values": [
+      "Y",
+      "YES",
+      "TRUE",
+      "1",
+      "VERIFIED"
+    ],
+    "note": "A proposed Level 4 is only final when GDM confirms it: either a '<column> L4 Verified' column says Yes, or the reviewer approves it in the Validation Queue."
+  }
+}

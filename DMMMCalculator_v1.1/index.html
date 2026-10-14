@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>DMMM 2026 Results Engine</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%231F4E3D'/%3E%3Cpath d='M3 12h2V9H3zm4 0h2V6H7zm4 0h2V3h-2z' fill='%23fff'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="app/styles.css">
+  <script src="vendor/exceljs.min.js" defer></script>
+  <script type="module" src="app/app.js"></script>
+</head>
+<body>
+  <header class="masthead">
+    <div class="masthead-inner">
+      <div>
+        <h1>DMMM 2026 Results Engine</h1>
+        <p class="lede">Scores country assessments, applies Global Digital Marketing data and builds the global tracker.</p>
+      </div>
+      <p class="privacy" id="privacy">Files are read in this browser only. Nothing is uploaded or stored online.</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="intake" aria-labelledby="intake-title">
+      <h2 id="intake-title">Load files</h2>
+      <label class="dropzone" id="dropzone" for="file-input">
+        <input id="file-input" type="file" multiple accept=".xlsx,.xlsm">
+        <span class="drop-main">Drop Excel files here, or choose files</span>
+        <span class="drop-sub">Add as many as you like in one go. Each file is recognised automatically.</span>
+      </label>
+      <dl class="kinds">
+        <div><dt>Country workbooks</dt><dd>Completed DMMM 2026 files, one per country and BU</dd></div>
+        <div><dt>Global Metrics</dt><dd>GDM data for the pre-populated rows, in the All Global Metrics layout</dd></div>
+        <div><dt>Saved 2026 tracker</dt><dd>A tracker downloaded earlier, to continue where you left off and apply reviewer decisions</dd></div>
+        <div><dt>2025 Global Tracker</dt><dd>Adds 2022-2025 history and the 2026 targets set last year</dd></div>
+      </dl>
+      <div id="sources" class="sources" aria-live="polite"></div>
+      <div id="busy" class="busy" hidden>Reading files...</div>
+    </section>
+
+    <section id="alerts" class="alerts" aria-live="polite"></section>
+
+    <section class="overview" id="overview" hidden>
+      <div class="stats" id="stats"></div>
+      <div class="actions">
+        <button id="download-tracker" class="primary" type="button">Download tracker</button>
+        <button id="clear" class="quiet" type="button">Start over</button>
+      </div>
+      <p id="verify" class="verify" aria-live="polite"></p>
+    </section>
+
+    <section class="workspace" id="workspace" hidden>
+      <div class="tabs" role="tablist">
+        <button role="tab" aria-selected="true" data-tab="results" type="button">Results</button>
+        <button role="tab" aria-selected="false" data-tab="queue" type="button">Validation queue</button>
+        <button role="tab" aria-selected="false" data-tab="intake" type="button">Intake log</button>
+        <button role="tab" aria-selected="false" data-tab="changes" type="button">Change log</button>
+      </div>
+
+      <div class="panel" data-panel="results">
+        <div class="filters">
+          <label>Region <select id="f-region"><option value="">All</option></select></label>
+          <label>BU <select id="f-bu"><option value="">All</option></select></label>
+          <label class="grow">Market <input id="f-search" type="search" placeholder="Filter by name"></label>
+          <div class="legend" aria-hidden="true">
+            <span><i class="mk self"></i>Self current</span>
+            <span><i class="mk target"></i>Country target</span>
+            <span><i class="mk validated"></i>Validated</span>
+          </div>
+        </div>
+        <div class="table-wrap"><table class="results" id="results-table"></table></div>
+      </div>
+
+      <div class="panel" data-panel="queue" hidden>
+        <p class="hint">GDM reviewers record decisions in the Validation Queue sheet of the downloaded tracker (Approve, Override, Reject or Exclude), then load the tracker here again.</p>
+        <div class="table-wrap"><table id="queue-table"></table></div>
+      </div>
+      <div class="panel" data-panel="intake" hidden><div class="table-wrap"><table id="intake-table"></table></div></div>
+      <div class="panel" data-panel="changes" hidden><div class="table-wrap"><table id="changes-table"></table></div></div>
+    </section>
+
+    <section class="empty" id="empty">
+      <p>Start with the country workbooks you have. You can add the Global Metrics file and more countries later; download the tracker to keep your progress.</p>
+    </section>
+  </main>
+
+  <dialog id="detail" aria-labelledby="detail-title">
+    <div class="detail-head">
+      <div>
+        <h2 id="detail-title"></h2>
+        <p id="detail-sub"></p>
+      </div>
+      <button class="quiet" id="detail-close" type="button">Close</button>
+    </div>
+    <div id="detail-body"></div>
+  </dialog>
+
+  <footer class="foot">
+    <span id="versions"></span>
+  </footer>
+</body>
+</html>

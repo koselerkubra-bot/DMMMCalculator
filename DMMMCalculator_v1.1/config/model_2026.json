@@ -1,0 +1,828 @@
+{
+  "model_version": "2026.1",
+  "assessment_year": 2026,
+  "note": "Template structure of the DMMM 2026 country workbook. Capability boundaries are re-derived from each workbook's Summary outcome formulas at parse time; the rows below are the expected values used to validate the template and as a documented fallback.",
+  "sheets": {
+    "signup": "Sign-up",
+    "questionnaire": "DMMM Questionnaire",
+    "summary": "Summary outcome",
+    "general": "General Questions"
+  },
+  "required_sheets": [
+    "Introduction",
+    "Sign-up",
+    "General Questions",
+    "DMMM Questionnaire",
+    "Output & Target Level Defintion",
+    "Summary outcome",
+    "Radar",
+    "Roadmap",
+    "Priorities",
+    "Glossary",
+    "Country List"
+  ],
+  "identity_cells": {
+    "submitter": "D5",
+    "market": "D7",
+    "business_unit": "D9",
+    "assessment_date": "D11",
+    "review_date": "D13"
+  },
+  "questionnaire_columns": {
+    "capability": "B",
+    "skill": "C",
+    "self_current": "K",
+    "country_target": "L",
+    "comments": "M",
+    "inclusion": "P"
+  },
+  "questionnaire_header_row": 4,
+  "expected_headers": {
+    "K": "Self-rating",
+    "L": "Target Rating +1 years",
+    "P": "Weighting"
+  },
+  "summary": {
+    "first_row": 9,
+    "last_row": 94,
+    "capability_score_column": "D",
+    "row_offset_to_questionnaire": 4
+  },
+  "valid_scores": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "business_units": {
+    "CP": [
+      "CP",
+      "CROP PROTECTION",
+      "CROPPROTECTION",
+      "C P"
+    ],
+    "Seeds": [
+      "SEEDS",
+      "SEED",
+      "S"
+    ],
+    "Other": [
+      "OTHER"
+    ]
+  },
+  "capabilities": [
+    {
+      "id": "DMS",
+      "name": "Digital Marketing Strategy (DMS)",
+      "short_name": "DM Strategy",
+      "first_row": 5,
+      "last_row": 13,
+      "summary_row": 9,
+      "history_labels": [
+        "DM Strategy",
+        "DMS",
+        "Digital Marketing Strategy"
+      ],
+      "history_goal_labels": [
+        "DMS Goal",
+        "DM Strategy Goal"
+      ]
+    },
+    {
+      "id": "CM",
+      "name": "Content Marketing",
+      "short_name": "Content Marketing",
+      "first_row": 14,
+      "last_row": 24,
+      "summary_row": 18,
+      "history_labels": [
+        "Content Marketing"
+      ],
+      "history_goal_labels": [
+        "Content Marketing Goal"
+      ]
+    },
+    {
+      "id": "PDM",
+      "name": "Paid Digital Media",
+      "short_name": "Paid Media",
+      "first_row": 25,
+      "last_row": 36,
+      "summary_row": 29,
+      "history_labels": [
+        "Paid Media",
+        "Paid Digital Media"
+      ],
+      "history_goal_labels": [
+        "Paid Media Goal"
+      ]
+    },
+    {
+      "id": "SM",
+      "name": "Social Media",
+      "short_name": "Social Media",
+      "first_row": 37,
+      "last_row": 46,
+      "summary_row": 41,
+      "history_labels": [
+        "Social Media"
+      ],
+      "history_goal_labels": [
+        "Social Media Goal"
+      ]
+    },
+    {
+      "id": "IMP",
+      "name": "Influencer Marketing & Partnership",
+      "short_name": "IM & Partnership",
+      "first_row": 47,
+      "last_row": 51,
+      "summary_row": 51,
+      "history_labels": [
+        "IM & Partnership",
+        "Influencer Marketing"
+      ],
+      "history_goal_labels": [
+        "IM & Partnership Goal",
+        "IM Goal"
+      ]
+    },
+    {
+      "id": "UX",
+      "name": "User Experience (UX) Web Design / Mobile",
+      "short_name": "UX/Mobile",
+      "first_row": 52,
+      "last_row": 60,
+      "summary_row": 56,
+      "history_labels": [
+        "UX/Mobile",
+        "UX / Mobile",
+        "UX"
+      ],
+      "history_goal_labels": [
+        "UX/Mobile Goal",
+        "UX Goal"
+      ]
+    },
+    {
+      "id": "SEO",
+      "name": "Search Engine Optimization (SEO)",
+      "short_name": "SEO",
+      "first_row": 61,
+      "last_row": 71,
+      "summary_row": 65,
+      "history_labels": [
+        "SEO"
+      ],
+      "history_goal_labels": [
+        "SEO Goal"
+      ]
+    },
+    {
+      "id": "DA",
+      "name": "Data & Analytics",
+      "short_name": "Data & Analytics",
+      "first_row": 72,
+      "last_row": 80,
+      "summary_row": 76,
+      "history_labels": [
+        "Data & Analytics",
+        "D&A"
+      ],
+      "history_goal_labels": [
+        "Data & Analytics Goal",
+        "D&A Goal"
+      ]
+    },
+    {
+      "id": "MA",
+      "name": "Marketing Automation",
+      "short_name": "Marketing Automation",
+      "first_row": 81,
+      "last_row": 90,
+      "summary_row": 85,
+      "history_labels": [
+        "Marketing Automation",
+        "MA"
+      ],
+      "history_goal_labels": [
+        "MA Goal",
+        "Marketing Automation Goal"
+      ]
+    }
+  ],
+  "skills": [
+    {
+      "row": 5,
+      "skill": "Vision",
+      "owner": "country",
+      "capability_id": "DMS"
+    },
+    {
+      "row": 6,
+      "skill": "Strategy / Agenda",
+      "owner": "country",
+      "capability_id": "DMS"
+    },
+    {
+      "row": 7,
+      "skill": "Roadmap / Key Priorities",
+      "owner": "country",
+      "capability_id": "DMS"
+    },
+    {
+      "row": 8,
+      "skill": "Transformation KPIs",
+      "owner": "country",
+      "capability_id": "DMS"
+    },
+    {
+      "row": 9,
+      "skill": "Organization",
+      "owner": "country",
+      "capability_id": "DMS"
+    },
+    {
+      "row": 10,
+      "skill": "AI Integration in DMS",
+      "owner": "country",
+      "capability_id": "DMS"
+    },
+    {
+      "row": 11,
+      "skill": "Digital Marketing Budget Planning & Allocation",
+      "owner": "country",
+      "capability_id": "DMS"
+    },
+    {
+      "row": 12,
+      "skill": "Digital Partner Governance & Agency Effectiveness",
+      "owner": "country",
+      "capability_id": "DMS"
+    },
+    {
+      "row": 13,
+      "skill": "DMS Completion",
+      "owner": "gdm",
+      "gdm_team": "Global Digital Marketing",
+      "capability_id": "DMS"
+    },
+    {
+      "row": 14,
+      "skill": "Assignment",
+      "owner": "country",
+      "capability_id": "CM"
+    },
+    {
+      "row": 15,
+      "skill": "Experience, Resources and Skills",
+      "owner": "country",
+      "capability_id": "CM"
+    },
+    {
+      "row": 16,
+      "skill": "Content Research",
+      "owner": "country",
+      "capability_id": "CM"
+    },
+    {
+      "row": 17,
+      "skill": "Content Strategy",
+      "owner": "country",
+      "capability_id": "CM"
+    },
+    {
+      "row": 18,
+      "skill": "Content Creation",
+      "owner": "country",
+      "capability_id": "CM"
+    },
+    {
+      "row": 19,
+      "skill": "Content Success Measurement",
+      "owner": "country",
+      "capability_id": "CM"
+    },
+    {
+      "row": 20,
+      "skill": "Content Reusability",
+      "owner": "country",
+      "capability_id": "CM"
+    },
+    {
+      "row": 21,
+      "skill": "Brand Guidelines Compliance",
+      "owner": "country",
+      "capability_id": "CM"
+    },
+    {
+      "row": 22,
+      "skill": "AI Adoption & Workflow Integration",
+      "owner": "country",
+      "capability_id": "CM"
+    },
+    {
+      "row": 23,
+      "skill": "Canva Usage",
+      "owner": "gdm",
+      "gdm_team": "Global Digital Marketing",
+      "capability_id": "CM"
+    },
+    {
+      "row": 24,
+      "skill": "Trinity Usage",
+      "owner": "gdm",
+      "gdm_team": "Global Digital Marketing",
+      "capability_id": "CM"
+    },
+    {
+      "row": 25,
+      "skill": "Assignment / Ownership",
+      "owner": "country",
+      "capability_id": "PDM"
+    },
+    {
+      "row": 26,
+      "skill": "Experience, Resources and Skills",
+      "owner": "country",
+      "capability_id": "PDM"
+    },
+    {
+      "row": 27,
+      "skill": "Search Ads (SEM)",
+      "owner": "country",
+      "capability_id": "PDM"
+    },
+    {
+      "row": 28,
+      "skill": "Display Ads",
+      "owner": "country",
+      "capability_id": "PDM"
+    },
+    {
+      "row": 29,
+      "skill": "Video Ads",
+      "owner": "country",
+      "capability_id": "PDM"
+    },
+    {
+      "row": 30,
+      "skill": "Paid Media Platforms Usage",
+      "owner": "country",
+      "capability_id": "PDM"
+    },
+    {
+      "row": 31,
+      "skill": "PMAX (Performance Max Campaigns)",
+      "owner": "country",
+      "capability_id": "PDM"
+    },
+    {
+      "row": 32,
+      "skill": "Demand Gen Ads",
+      "owner": "country",
+      "capability_id": "PDM"
+    },
+    {
+      "row": 33,
+      "skill": "Remarketing / Retargeting",
+      "owner": "country",
+      "capability_id": "PDM"
+    },
+    {
+      "row": 34,
+      "skill": "Paid Social",
+      "owner": "country",
+      "capability_id": "PDM"
+    },
+    {
+      "row": 35,
+      "skill": "AI Usage & Enablement",
+      "owner": "country",
+      "capability_id": "PDM"
+    },
+    {
+      "row": 36,
+      "skill": "Cross-Channel Performance Measurement & ROI",
+      "owner": "country",
+      "capability_id": "PDM"
+    },
+    {
+      "row": 37,
+      "skill": "Assignment",
+      "owner": "country",
+      "capability_id": "SM"
+    },
+    {
+      "row": 38,
+      "skill": "Experience",
+      "owner": "country",
+      "capability_id": "SM"
+    },
+    {
+      "row": 39,
+      "skill": "Resources and Skills",
+      "owner": "country",
+      "capability_id": "SM"
+    },
+    {
+      "row": 40,
+      "skill": "Social Media Strategy and Management",
+      "owner": "country",
+      "capability_id": "SM"
+    },
+    {
+      "row": 41,
+      "skill": "Social Media Platforms",
+      "owner": "country",
+      "capability_id": "SM"
+    },
+    {
+      "row": 42,
+      "skill": "Social Media Content",
+      "owner": "country",
+      "capability_id": "SM"
+    },
+    {
+      "row": 43,
+      "skill": "Social Media Listening",
+      "owner": "country",
+      "capability_id": "SM"
+    },
+    {
+      "row": 44,
+      "skill": "Social Media Metrics",
+      "owner": "country",
+      "capability_id": "SM"
+    },
+    {
+      "row": 45,
+      "skill": "Community Management & Response Handling",
+      "owner": "country",
+      "capability_id": "SM"
+    },
+    {
+      "row": 46,
+      "skill": "Emplifi Usage",
+      "owner": "gdm",
+      "gdm_team": "Global Digital Marketing",
+      "capability_id": "SM"
+    },
+    {
+      "row": 47,
+      "skill": "Assignment",
+      "owner": "country",
+      "capability_id": "IMP"
+    },
+    {
+      "row": 48,
+      "skill": "Experience",
+      "owner": "country",
+      "capability_id": "IMP"
+    },
+    {
+      "row": 49,
+      "skill": "Resources and Skills",
+      "owner": "country",
+      "capability_id": "IMP"
+    },
+    {
+      "row": 50,
+      "skill": "Social Influencer Marketing",
+      "owner": "country",
+      "capability_id": "IMP"
+    },
+    {
+      "row": 51,
+      "skill": "Partnership",
+      "owner": "country",
+      "capability_id": "IMP"
+    },
+    {
+      "row": 52,
+      "skill": "UX / Web Design Ownership",
+      "owner": "country",
+      "capability_id": "UX"
+    },
+    {
+      "row": 53,
+      "skill": "User Research & Validation",
+      "owner": "country",
+      "capability_id": "UX"
+    },
+    {
+      "row": 54,
+      "skill": "Design System Adoption (Drupal + VEV)",
+      "owner": "country",
+      "capability_id": "UX"
+    },
+    {
+      "row": 55,
+      "skill": "Custom Code & Technical Debt",
+      "owner": "country",
+      "capability_id": "UX"
+    },
+    {
+      "row": 56,
+      "skill": "Custom Drupal Development Velocity",
+      "owner": "country",
+      "capability_id": "UX"
+    },
+    {
+      "row": 57,
+      "skill": "Content Operations & Publishing Velocity",
+      "owner": "country",
+      "capability_id": "UX"
+    },
+    {
+      "row": 58,
+      "skill": "Visual Design & Brand Consistency",
+      "owner": "country",
+      "capability_id": "UX"
+    },
+    {
+      "row": 59,
+      "skill": "AI Adoption in Design & Web Workflows",
+      "owner": "country",
+      "capability_id": "UX"
+    },
+    {
+      "row": 60,
+      "skill": "Web Performance & Accessibility",
+      "owner": "gdm",
+      "gdm_team": "Global Digital Marketing",
+      "capability_id": "UX"
+    },
+    {
+      "row": 61,
+      "skill": "Assignment & Ownership",
+      "owner": "country",
+      "capability_id": "SEO"
+    },
+    {
+      "row": 62,
+      "skill": "Experience, Resources and Skills",
+      "owner": "country",
+      "capability_id": "SEO"
+    },
+    {
+      "row": 63,
+      "skill": "SEO Strategy & Roadmap",
+      "owner": "country",
+      "capability_id": "SEO"
+    },
+    {
+      "row": 64,
+      "skill": "Structured Data Implementation",
+      "owner": "country",
+      "capability_id": "SEO"
+    },
+    {
+      "row": 65,
+      "skill": "Content & Keyword Coverage",
+      "owner": "country",
+      "capability_id": "SEO"
+    },
+    {
+      "row": 66,
+      "skill": "Backlink Outreach & Off-page Activity",
+      "owner": "country",
+      "capability_id": "SEO"
+    },
+    {
+      "row": 67,
+      "skill": "AI Search Optimization (AIO)",
+      "owner": "country",
+      "capability_id": "SEO"
+    },
+    {
+      "row": 68,
+      "skill": "SEO Performance Measurement",
+      "owner": "country",
+      "capability_id": "SEO"
+    },
+    {
+      "row": 69,
+      "skill": "Technical SEO Health Score",
+      "owner": "gdm",
+      "gdm_team": "Global Digital Marketing",
+      "capability_id": "SEO"
+    },
+    {
+      "row": 70,
+      "skill": "Core Web Vitals & Page Experience",
+      "owner": "gdm",
+      "gdm_team": "Global Digital Marketing",
+      "capability_id": "SEO"
+    },
+    {
+      "row": 71,
+      "skill": "Schema Validity Score",
+      "owner": "gdm",
+      "gdm_team": "Global Digital Marketing",
+      "capability_id": "SEO"
+    },
+    {
+      "row": 72,
+      "skill": "Ownership & Accountability",
+      "owner": "country",
+      "capability_id": "DA"
+    },
+    {
+      "row": 73,
+      "skill": "Experience & Skills - Technical Implementation",
+      "owner": "country",
+      "capability_id": "DA"
+    },
+    {
+      "row": 74,
+      "skill": "Experience & Skills - Analysis",
+      "owner": "country",
+      "capability_id": "DA"
+    },
+    {
+      "row": 75,
+      "skill": "Measurement Framework",
+      "owner": "country",
+      "capability_id": "DA"
+    },
+    {
+      "row": 76,
+      "skill": "Tracking & Data Collection",
+      "owner": "country",
+      "capability_id": "DA"
+    },
+    {
+      "row": 77,
+      "skill": "Data Quality & Governance",
+      "owner": "country",
+      "capability_id": "DA"
+    },
+    {
+      "row": 78,
+      "skill": "First-Party Grower Data",
+      "owner": "country",
+      "capability_id": "DA"
+    },
+    {
+      "row": 79,
+      "skill": "Insight Generation & Activation",
+      "owner": "country",
+      "capability_id": "DA"
+    },
+    {
+      "row": 80,
+      "skill": "AI-Augmented Analytics",
+      "owner": "country",
+      "capability_id": "DA"
+    },
+    {
+      "row": 81,
+      "skill": "Adoption & Ownership",
+      "owner": "country",
+      "capability_id": "MA"
+    },
+    {
+      "row": 82,
+      "skill": "Experience, Resources and Skills",
+      "owner": "country",
+      "capability_id": "MA"
+    },
+    {
+      "row": 83,
+      "skill": "Data Foundation",
+      "owner": "country",
+      "capability_id": "MA"
+    },
+    {
+      "row": 84,
+      "skill": "Lead Management",
+      "owner": "country",
+      "capability_id": "MA"
+    },
+    {
+      "row": 85,
+      "skill": "Journeys & Nurturing",
+      "owner": "country",
+      "capability_id": "MA"
+    },
+    {
+      "row": 86,
+      "skill": "Multi-Channel Orchestration",
+      "owner": "country",
+      "capability_id": "MA"
+    },
+    {
+      "row": 87,
+      "skill": "Impact, Reporting & Optimization",
+      "owner": "country",
+      "capability_id": "MA"
+    },
+    {
+      "row": 88,
+      "skill": "Consent & Permission Management",
+      "owner": "country",
+      "capability_id": "MA"
+    },
+    {
+      "row": 89,
+      "skill": "Marketing Capabilities within Marketing Cloud",
+      "owner": "gdm",
+      "gdm_team": "Global Marketing Automation",
+      "capability_id": "MA"
+    },
+    {
+      "row": 90,
+      "skill": "List Health & Deliverability",
+      "owner": "gdm",
+      "gdm_team": "Global Marketing Automation",
+      "capability_id": "MA"
+    }
+  ],
+  "general_questions": [
+    {
+      "key": "growers_total",
+      "label": "# of growers in country according to the country",
+      "cell": "C11"
+    },
+    {
+      "key": "growers_target",
+      "label": "# of growers that are a target for SYN",
+      "cell": "D12"
+    },
+    {
+      "key": "crm_contacts",
+      "label": "2026 # of contacts in database according to the country",
+      "cell": "C13"
+    },
+    {
+      "key": "agencies",
+      "label": "# of Agencies",
+      "cell": "C51"
+    },
+    {
+      "key": "campaign_planning",
+      "label": "Campaign planning",
+      "cell": "C73"
+    },
+    {
+      "key": "journey_maps",
+      "label": "Customer journey maps",
+      "cell": "C74"
+    },
+    {
+      "key": "npis",
+      "label": "2026 NPIs",
+      "cell": "C75"
+    },
+    {
+      "key": "direct_grower_contact",
+      "label": "Direct communication with growers",
+      "cell": "C76"
+    }
+  ],
+  "history": {
+    "primary_sheet": "Results",
+    "cross_check_sheets": [
+      "EUROPE CP",
+      "EUROPE SEED",
+      "EUROPE ALL",
+      "AMEA REGION",
+      "LATAM REGION",
+      "Lighthouses"
+    ],
+    "tolerance": 0.001,
+    "overall_labels": {
+      "current": [
+        "Maturity",
+        "Current Maturity"
+      ],
+      "target": [
+        "Target Maturity"
+      ]
+    },
+    "results_columns_overall": [
+      "2022 Maturity",
+      "2023 Target Maturity",
+      "2023 Maturity",
+      "2024 Target Maturity",
+      "2024 Current Maturity",
+      "2025 Target Maturity",
+      "2025 Current Maturity",
+      "2026 Target Maturity"
+    ],
+    "results_capability_years": {
+      "current": [
+        2024,
+        2025
+      ],
+      "goal": [
+        2026
+      ]
+    }
+  },
+  "benchmarks": {
+    "min_records_for_average": 3
+  }
+}

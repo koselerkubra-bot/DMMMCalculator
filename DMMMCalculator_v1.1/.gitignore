@@ -1,0 +1,8 @@
+node_modules/
+scratch/
+private-fixtures/
+*.local.xlsx
+.DS_Store
+# Never commit country submissions or Global Metrics data
+*.xlsm
+data/
