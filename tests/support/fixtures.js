@@ -79,3 +79,14 @@ export async function makeMetricsWorkbook(rows, opts = {}) {
 }
 
 export const PRIVATE_DIR = process.env.DMMM_PRIVATE_DIR || path.join(ROOT, 'private-fixtures');
+
+/** Minimal legacy 2025 Global Tracker: a Results tab in the 2025 header layout. */
+export async function makeHistoryWorkbook(rows) {
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('Results');
+  ws.getCell('A1').value = 'Global DMMM Results 2022 - 2025';
+  ws.getRow(5).values = ['Region', 'BU', 'Market', '2025 Current Maturity', '2026 Target Maturity', '2025 SEO', '2025 DM Strategy'];
+  rows.forEach((r, i) => { ws.getRow(6 + i).values = r; });
+  ws.getRow(6 + rows.length + 1).values = [null, 'Total ', 'Overall Average', 1.9];
+  return new Uint8Array(await wb.xlsx.writeBuffer());
+}

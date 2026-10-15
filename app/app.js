@@ -186,15 +186,49 @@ function pill(status) {
   return `<span class="pill ${cls}">${esc(status)}</span>`;
 }
 
-function ladder(self, target, validated) {
-  const w = 132, x0 = 6, x = (v) => x0 + (v / 4) * (w - 2 * x0);
-  const ticks = [0, 1, 2, 3, 4].map((t) => `<line x1="${x(t)}" x2="${x(t)}" y1="9" y2="13" class="track"/><text x="${x(t)}" y="24" text-anchor="middle" class="tick">${t}</text>`).join('');
-  const parts = [`<line x1="${x0}" x2="${w - x0}" y1="11" y2="11" class="track" stroke-width="2"/>`, ticks];
-  if (target !== null) parts.push(`<circle cx="${x(target)}" cy="11" r="5.5" class="target"/>`);
-  if (self !== null) parts.push(`<circle cx="${x(self)}" cy="11" r="3.6" class="self"/>`);
-  if (validated !== null) parts.push(`<rect x="${x(validated) - 3.5}" y="7.5" width="7" height="7" class="validated" transform="rotate(45 ${x(validated)} 11)"/>`);
-  const label = `Self ${fmt(self)}, target ${fmt(target)}, validated ${fmt(validated)}`;
-  return `<svg class="ladder" width="${w}" height="26" viewBox="0 0 ${w} 26" role="img" aria-label="${esc(label)}">${parts.join('')}</svg>`;
+/**
+ * Bullet chart on the 0-4 maturity scale.
+ * Green bar = country self current, blue bar = GDM validated (shown once available),
+ * gold vertical line = country target. The gap to target is written next to it.
+ */
+function gauge(self, target, validated, opts = {}) {
+  const W = opts.width || 150, pad = 2, H = 30;
+  const x = (v) => pad + (Math.max(0, Math.min(4, v)) / 4) * (W - 2 * pad);
+  const two = validated !== null && validated !== undefined;
+  const barH = two ? 7 : 10;
+  const ySelf = two ? 3 : 5, yVal = 12;
+  const p = [];
+  for (const t of [0, 1, 2, 3, 4]) {
+    p.push(`<line x1="${x(t)}" x2="${x(t)}" y1="1" y2="${two ? 21 : 17}" class="g-grid"/>`);
+    p.push(`<text x="${x(t)}" y="${H - 1}" text-anchor="middle" class="g-tick">${t}</text>`);
+  }
+  p.push(`<rect x="${pad}" y="${ySelf}" width="${W - 2 * pad}" height="${two ? 16 : barH}" rx="2" class="g-track"/>`);
+  if (self !== null && self !== undefined) p.push(`<rect x="${pad}" y="${ySelf}" width="${Math.max(1, x(self) - pad)}" height="${barH}" rx="2" class="g-self"/>`);
+  if (two) p.push(`<rect x="${pad}" y="${yVal}" width="${Math.max(1, x(validated) - pad)}" height="${barH}" rx="2" class="g-val"/>`);
+  if (target !== null && target !== undefined) p.push(`<rect x="${x(target) - 1.5}" y="0" width="3" height="${two ? 22 : 20}" rx="1.5" class="g-target"/>`);
+  const label = `Self current ${fmt(self)}${two ? `, validated ${fmt(validated)}` : ''}, country target ${fmt(target)}`;
+  const svg = `<svg class="gauge" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(label)}">${p.join('')}</svg>`;
+  const base = two ? validated : self;
+  let gap = '';
+  if (base !== null && base !== undefined && target !== null && target !== undefined) {
+    const d = target - base;
+    gap = Math.abs(d) < 0.005 ? '<span class="gap met">at target</span>'
+      : d > 0 ? `<span class="gap">+${d.toFixed(2)} to target</span>`
+      : `<span class="gap met">${Math.abs(d).toFixed(2)} above target</span>`;
+  }
+  return `<div class="gauge-wrap">${svg}${opts.noGap ? '' : gap}</div>`;
+}
+
+/** YoY cell: validated change when available (official), otherwise provisional change on self-assessment. */
+function yoy(prev, dValidated, dSelf, opts = {}) {
+  if (prev === null || prev === undefined) return opts.newLabel === false ? '<span class="sub">–</span>' : '<span class="sub">New in 2026</span>';
+  const official = dValidated !== null && dValidated !== undefined;
+  const d = official ? dValidated : dSelf;
+  if (d === null || d === undefined) return `<span class="sub">2025: ${prev.toFixed(1)}</span>`;
+  const dir = d > 0.005 ? 'up' : d < -0.005 ? 'down' : 'flat';
+  const arrow = { up: '▲', down: '▼', flat: '■' }[dir];
+  const tag = official ? '<span class="yoy-tag val">validated</span>' : '<span class="yoy-tag">provisional</span>';
+  return `<span class="yoy ${dir}" title="2025 ${prev.toFixed(2)} → 2026 ${official ? 'validated' : 'self'} ${(prev + d).toFixed(2)}">${arrow} ${d > 0 ? '+' : ''}${d.toFixed(2)}</span>${opts.compact ? '' : `<br><span class="sub">from ${prev.toFixed(1)}</span> ${tag}`}`;
 }
 
 function filtered() {
@@ -205,19 +239,17 @@ function filtered() {
 function renderResults() {
   const rs = filtered();
   $('#results-table').innerHTML = `<thead><tr>
-    <th>Market</th><th>Region</th><th>Profile</th><th>0 – 4</th>
+    <th>Market</th><th>Region</th><th>Current vs target (0 – 4)</th>
     <th class="num group-own">Self current</th><th class="num group-gdm">Validated</th><th class="num group-own">Target +1Y</th>
-    <th>Country input</th><th>GDM validation</th><th class="num">Global rows open</th><th class="num">2025 current</th><th></th></tr></thead>
-    <tbody>${rs.map((r, i) => `<tr>
+    <th>YoY vs 2025</th><th>Country input</th><th>GDM validation</th><th></th></tr></thead>
+    <tbody>${rs.map((r) => `<tr>
       <td><span class="market">${esc(r.identity.country_name)}${r.lighthouse ? '*' : ''}</span> <span class="sub">${esc(r.business_unit)}</span><br><span class="sub">${esc(r.sub.source_file_name)} · v${r.sub.version}</span></td>
-      <td>${esc(r.identity.region)}${r.identity.subregion ? ` <span class="sub">${esc(r.identity.subregion)}</span>` : ''}</td>
-      <td>${esc(r.identity.profile)}</td>
-      <td>${ladder(r.self_current, r.country_target, r.validated_current)}</td>
+      <td>${esc(r.identity.region)}${r.identity.subregion ? ` <span class="sub">${esc(r.identity.subregion)}</span>` : ''}<br><span class="sub">${esc(r.identity.profile)} profile</span></td>
+      <td>${gauge(r.self_current, r.country_target, r.validated_current)}</td>
       <td class="num">${fmt(r.self_current)}</td><td class="num">${fmt(r.validated_current)}</td><td class="num">${fmt(r.country_target)}</td>
+      <td>${r.needs_choice ? '–' : !portfolio.history ? '<span class="sub">Load 2025 tracker</span>' : yoy(r.history.overall['2025 Current Maturity'], r.bench.yoy, r.bench.yoy_self)}</td>
       <td>${pill(r.country_status)}${r.missing_self.length || r.missing_target.length ? `<br><span class="sub">${r.missing_self.length} self, ${r.missing_target.length} target missing</span>` : ''}</td>
-      <td>${r.needs_choice ? '–' : pill(r.gdm_status)}</td>
-      <td class="num">${r.needs_choice ? '–' : r.gdm.pending}</td>
-      <td class="num">${fmt(r.history.overall['2025 Current Maturity'])}</td>
+      <td>${r.needs_choice ? '–' : `${pill(r.gdm_status)}${r.gdm.pending ? `<br><span class="sub">${r.gdm.pending} Global row${r.gdm.pending === 1 ? '' : 's'} open</span>` : ''}`}</td>
       <td class="actions-cell"><button class="link" type="button" data-detail="${esc(r.key)}">Details</button><br><button class="link" type="button" data-country="${esc(r.key)}">Country file</button></td>
     </tr>`).join('')}</tbody>`;
 }
@@ -237,7 +269,7 @@ async function onResultsClick(e) {
 function openDetail(r) {
   $('#detail-title').textContent = `${r.identity.country_name} ${r.business_unit}`;
   $('#detail-sub').textContent = `${r.identity.region} · ${r.identity.profile} profile · ${r.sub.source_file_name} (v${r.sub.version}) · submitter ${r.sub.submitter || '–'}`;
-  const caps = r.scores.capabilities.map((c) => `<tr><td>${esc(c.name)}</td><td>${ladder(c.self_current, c.country_target, r.validated_current === null ? null : c.validated_current)}</td><td class="num">${fmt(c.self_current)}</td><td class="num">${fmt(r.validated_current === null ? null : c.validated_current)}</td><td class="num">${fmt(c.country_target)}</td><td class="num">${c.n_excluded_p0 || ''}</td></tr>`).join('');
+  const caps = r.scores.capabilities.map((c) => `<tr><td>${esc(c.name)}</td><td>${gauge(c.self_current, c.country_target, r.validated_current === null ? null : c.validated_current)}</td><td class="num">${fmt(c.self_current)}</td><td class="num">${fmt(r.validated_current === null ? null : c.validated_current)}</td><td class="num">${fmt(c.country_target)}</td><td class="num">${fmt(r.yoy_cap[c.id].prev)}</td><td>${portfolio.history ? yoy(r.yoy_cap[c.id].prev, r.yoy_cap[c.id].d_validated, r.yoy_cap[c.id].d_self, { compact: true, newLabel: false }) : ''}</td><td class="num">${c.n_excluded_p0 || ''}</td></tr>`).join('');
   const skills = r.sub.skills.map((s) => {
     const g = r.gdm.rows.get(s.row);
     return `<tr class="${s.owner === 'gdm' ? 'row-gdm' : ''} ${s.inclusion === 0 ? 'row-p0' : ''}"><td class="num">${s.row}</td><td>${esc(s.skill)}</td><td>${s.owner === 'gdm' ? 'GDM' : 'Country'}</td><td class="num">${s.inclusion ?? ''}</td><td class="num">${s.self_current ?? '–'}</td><td class="num">${s.country_target ?? '–'}</td><td class="num">${g?.proposal.proposed_level ?? ''}</td><td class="num">${g?.final_value ?? ''}</td><td>${g ? esc(g.status) : ''}</td><td class="wrap sub">${esc([...(g?.proposal.notes || []), g?.note, ...s.issues].filter(Boolean).join(' · '))}</td></tr>`;
@@ -246,8 +278,8 @@ function openDetail(r) {
   $('#detail-body').innerHTML = `
     <div><span>${pill(r.country_status)}</span> <span>${r.needs_choice ? '' : pill(r.gdm_status)}</span></div>
     ${missing.length ? `<div class="alert bad"><h3>Country inputs to complete</h3><ul>${missing.map((m) => `<li>${esc(m)}</li>`).join('')}</ul></div>` : ''}
-    <div><h3>Capabilities</h3><div class="table-wrap"><table><thead><tr><th>Capability</th><th>0 – 4</th><th class="num group-own">Self</th><th class="num group-gdm">Validated</th><th class="num group-own">Target</th><th class="num">P=0</th></tr></thead><tbody>
-    <tr><td><b>Overall</b></td><td>${ladder(r.self_current, r.country_target, r.validated_current)}</td><td class="num"><b>${fmt(r.self_current)}</b></td><td class="num"><b>${fmt(r.validated_current)}</b></td><td class="num"><b>${fmt(r.country_target)}</b></td><td></td></tr>${caps}</tbody></table></div></div>
+    <div><h3>Capabilities</h3><div class="table-wrap"><table><thead><tr><th>Capability</th><th>Current vs target (0 – 4)</th><th class="num group-own">Self</th><th class="num group-gdm">Validated</th><th class="num group-own">Target</th><th class="num">2025</th><th>YoY</th><th class="num">P=0</th></tr></thead><tbody>
+    <tr><td><b>Overall</b></td><td>${gauge(r.self_current, r.country_target, r.validated_current)}</td><td class="num"><b>${fmt(r.self_current)}</b></td><td class="num"><b>${fmt(r.validated_current)}</b></td><td class="num"><b>${fmt(r.country_target)}</b></td><td class="num">${fmt(r.history.overall['2025 Current Maturity'])}</td><td>${portfolio.history ? yoy(r.history.overall['2025 Current Maturity'], r.bench.yoy, r.bench.yoy_self, { compact: true }) : ''}</td><td></td></tr>${caps}</tbody></table></div></div>
     <div><h3>Skills</h3><div class="table-wrap"><table><thead><tr><th class="num">Row</th><th>Skill</th><th>Owner</th><th class="num">P</th><th class="num group-own">Self (K)</th><th class="num group-own">Target (L)</th><th class="num group-gdm">GDM proposal</th><th class="num group-gdm">GDM final</th><th>GDM status</th><th>Notes</th></tr></thead><tbody>${skills}</tbody></table></div></div>`;
   $('#detail').showModal();
 }

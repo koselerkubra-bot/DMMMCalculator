@@ -177,19 +177,49 @@ export class Portfolio {
       const regionAvg = avg(regionVals);
       const prev = r.history.overall['2025 Current Maturity'];
       const tgt2026 = r.history.overall['2026 Target Maturity'];
+      const has = (v) => v !== null && v !== undefined;
+      const met = (v) => (has(v) && has(tgt2026) ? (round(v, 1) >= tgt2026 ? 'Yes' : 'No') : null);
       r.bench = {
         region_avg: regionAvg, region_n: regionVals.length,
         bu_avg: avg(buVals), bu_n: buVals.length,
         global_avg: globalAvg, global_n: val.length,
-        vs_region: r.validated_current !== null && regionAvg !== null ? r.validated_current - regionAvg : null,
-        yoy: r.validated_current !== null && prev !== null && prev !== undefined ? r.validated_current - prev : null,
-        target_2026_met: r.validated_current !== null && tgt2026 !== null && tgt2026 !== undefined ? (round(r.validated_current, 1) >= tgt2026 ? 'Yes' : 'No') : null,
+        vs_region: has(r.validated_current) && has(regionAvg) ? r.validated_current - regionAvg : null,
+        // Official YoY: validated 2026 vs 2025 current (2025 also included GDM data -> same basis)
+        yoy: has(r.validated_current) && has(prev) ? r.validated_current - prev : null,
+        // Provisional YoY: country self-assessment vs 2025 current, available before GDM data
+        yoy_self: has(r.self_current) && has(prev) ? r.self_current - prev : null,
+        target_2026_met: met(r.validated_current),
+        target_2026_met_self: met(r.self_current),
       };
+      r.yoy_status = r.needs_choice ? null : !this.history ? 'No 2025 tracker loaded' : has(prev) ? 'Compared with 2025' : 'New in 2026 (no 2025 result)';
+      r.yoy_cap = Object.fromEntries(r.scores.capabilities.map((c) => {
+        const p25 = r.history.cap[c.id].current[2025];
+        const v = r.validated_current === null ? null : c.validated_current;
+        return [c.id, { prev: has(p25) ? p25 : null, self: r.needs_choice ? null : c.self_current, validated: v,
+          d_self: !r.needs_choice && has(p25) && has(c.self_current) ? c.self_current - p25 : null,
+          d_validated: has(p25) && has(v) ? v - p25 : null }];
+      }));
       r.lighthouse = (r.identity.lighthouse_bu || []).includes(r.business_unit);
     }
     rows.sort((a, b) => regionOrder(a.identity.region) - regionOrder(b.identity.region) || a.business_unit.localeCompare(b.business_unit) || a.identity.country_name.localeCompare(b.identity.country_name));
     return rows;
   }
+}
+
+/** Markets present in the 2025 tracker that have no 2026 file yet. */
+export function missingFrom2026(portfolio, rows) {
+  if (!portfolio.history) return [];
+  const have = new Set(rows.map((r) => r.key2));
+  const out = [];
+  for (const rec of portfolio.history.records.values()) {
+    if (have.has(rec.key)) continue;
+    const [id, bu] = rec.key.split('|');
+    const c = portfolio.resolver.byId.get(id);
+    const v = rec.values.get('2025|overall_current|');
+    out.push({ key: rec.key, country_id: id, country_name: c?.name || id, region: c?.region || '', business_unit: bu, current_2025: v ? v.value : null });
+  }
+  const ro = (r) => { const i = ['EUR', 'AMEA', 'LATAM', 'NA', 'JANZ'].indexOf(r); return i < 0 ? 99 : i; };
+  return out.sort((a, b) => ro(a.region) - ro(b.region) || a.country_name.localeCompare(b.country_name));
 }
 
 const REGION_ORDER = ['EUR', 'AMEA', 'LATAM', 'NA', 'JANZ'];

@@ -33,6 +33,9 @@ Exclude (N/A)), save, and load the tracker again.
 - GDM values 0-4 from the Global Metrics file are accepted automatically (policy in `threshold_config_2026.json`);
   reviewers can still Override, Reject or Exclude any row.
 - Country Input Status and GDM Validation Status are independent.
+- YoY (needs the 2025 Global Tracker): *validated* = official, 2026 validated vs 2025 current (same basis, includes GDM data);
+  *self, provisional* = 2026 self-assessment vs 2025 current, available before GDM data. Overall and capability level only,
+  because the 2026 questionnaire has new and changed skills. See the YoY Comparison sheet.
 - Capability boundaries are read from each workbook's `Summary outcome` formulas and checked against the model.
 - Reading check: the engine reproduces the workbook's own Summary value from the parsed cells.
 

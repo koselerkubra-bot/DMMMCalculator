@@ -2,7 +2,7 @@
 // runs in the browser (vendor/exceljs.min.js) and in Node (npm exceljs).
 import { round, nowIso } from './util.js';
 import { BU_SHORT } from './identity.js';
-import { regionOrder } from './portfolio.js';
+import { regionOrder, missingFrom2026 } from './portfolio.js';
 import { DECISION_OPTIONS } from './validation.js';
 
 export const STATE_FORMAT = 'dmmm-tracker-state/1';
@@ -41,8 +41,11 @@ export function resultColumns(model) {
     { h: 'Country Input Status', w: 22, g: 'country', status: true, v: (r) => r.country_status },
     { h: 'GDM Validation Status', w: 20, g: 'gdm', status: true, v: (r) => r.gdm_status },
     { h: 'Global Rows Pending', w: 9, g: 'gdm', v: (r) => (r.needs_choice ? null : r.gdm.pending) },
-    { h: '2026 Target Met (vs 2025 tracker)', w: 11, g: 'bench', v: (r) => r.bench.target_2026_met },
-    { h: 'YoY vs 2025 Current', w: 9, g: 'bench', num: true, v: (r) => r2(r.bench.yoy) },
+    { h: 'YoY vs 2025 (validated)', w: 10, g: 'bench', num: true, v: (r) => r2(r.bench.yoy) },
+    { h: 'YoY vs 2025 (self, provisional)', w: 11, g: 'bench', num: true, v: (r) => r2(r.bench.yoy_self) },
+    { h: '2026 Target Met (validated)', w: 10, g: 'bench', v: (r) => r.bench.target_2026_met },
+    { h: '2026 Target Met (self, provisional)', w: 11, g: 'bench', v: (r) => r.bench.target_2026_met_self },
+    { h: 'YoY Basis', w: 16, g: 'bench', v: (r) => r.yoy_status },
     { h: 'Region Avg 2026 (validated)', w: 10, g: 'bench', num: true, v: (r) => r2(r.bench.region_avg) },
     { h: 'vs Region Avg', w: 9, g: 'bench', num: true, v: (r) => r2(r.bench.vs_region) },
     { h: 'Global Avg 2026 (validated)', w: 10, g: 'bench', num: true, v: (r) => r2(r.bench.global_avg) },
@@ -329,6 +332,51 @@ export async function buildTrackerWorkbook(ExcelJS, portfolio, rows, opts = {}) 
   ];
   table(il, 4, ilCols, intake);
 
+  // ---- YoY Comparison ------------------------------------------------------------------
+  const yw = wb.addWorksheet('YoY Comparison', { views: [{ state: 'frozen', xSplit: 3, ySplit: 4 }] });
+  title(yw, 'Year-on-year comparison 2025 -> 2026', 'Validated = official (same basis as 2025, includes GDM data). Self = provisional, based on the country self-assessment until GDM data is available. Compared at overall and capability level only: the 2026 questionnaire has new and changed skills.');
+  const yCols = [
+    { h: 'Region', w: 8, v: (r) => r.identity.region }, { h: 'BU', w: 7, v: (r) => r.business_unit },
+    { h: 'Market', w: 24, v: (r) => marketLabel(r) }, { h: 'Country ID', w: 9, v: (r) => r.identity.country_id },
+    { h: 'YoY Basis', w: 18, v: (r) => r.yoy_status },
+    { h: '2025 Current', w: 9, num: true, v: (r) => r2(r.history.overall['2025 Current Maturity']) },
+    { h: '2026 Self', w: 9, num: true, v: (r) => r2(r.self_current) },
+    { h: 'YoY Self (provisional)', w: 10, num: true, v: (r) => r2(r.bench.yoy_self) },
+    { h: '2026 Validated', w: 9, num: true, v: (r) => r2(r.validated_current) },
+    { h: 'YoY Validated', w: 9, num: true, v: (r) => r2(r.bench.yoy) },
+  ];
+  for (const cap of model.capabilities) {
+    const n = cap.short_name;
+    yCols.push(
+      { h: `2025 ${n}`, w: 9, num: true, v: (r) => r2(r.yoy_cap[cap.id].prev) },
+      { h: `YoY ${n} Self (prov.)`, w: 9, num: true, v: (r) => r2(r.yoy_cap[cap.id].d_self) },
+      { h: `YoY ${n} Validated`, w: 9, num: true, v: (r) => r2(r.yoy_cap[cap.id].d_validated) },
+    );
+  }
+  const yt = table(yw, 4, yCols, rows.filter((r) => !r.needs_choice));
+  // colour the deltas: green up, red down
+  yCols.forEach((c, i) => {
+    if (!/^YoY/.test(c.h) || c.h === 'YoY Basis') return;
+    for (let rr = yt.first; rr <= yt.last; rr++) {
+      const cell = yw.getRow(rr).getCell(i + 1);
+      if (typeof cell.value === 'number') {
+        cell.numFmt = '+0.00;-0.00;0.00';
+        cell.font = { name: FONT, size: 9, bold: true, color: { argb: cell.value > 0 ? 'FF00782D' : cell.value < 0 ? 'FFB4370F' : C.ink } };
+      }
+    }
+  });
+  const missing = missingFrom2026(portfolio, rows);
+  let mrow = yt.next + 2;
+  yw.getCell(mrow, 1).value = portfolio.history ? `In the 2025 tracker, no 2026 file yet (${missing.length})` : 'Load the 2025 Global Tracker to compare with last year.';
+  yw.getCell(mrow, 1).font = { name: FONT, bold: true, size: 11, color: { argb: C.title } };
+  if (missing.length) {
+    table(yw, mrow + 1, [
+      { h: 'Region', w: 8, v: (m) => m.region }, { h: 'BU', w: 7, v: (m) => m.business_unit },
+      { h: 'Market', w: 24, v: (m) => m.country_name }, { h: 'Country ID', w: 9, v: (m) => m.country_id },
+      { h: 'YoY Basis', w: 18, v: () => 'No 2026 submission yet' }, { h: '2025 Current', w: 9, num: true, v: (m) => m.current_2025 },
+    ], missing, { filter: false });
+  }
+
   // ---- Portfolio Benchmarks ----------------------------------------------------------------
   const pb = wb.addWorksheet('Portfolio Benchmarks');
   title(pb, 'Portfolio Benchmarks 2026', `Averages of validated scores are shown once at least ${model.benchmarks.min_records_for_average} validated markets exist in the group.`);
@@ -340,6 +388,7 @@ export async function buildTrackerWorkbook(ExcelJS, portfolio, rows, opts = {}) 
     add(reg, rr);
     for (const bu of [...new Set(rr.map((r) => r.business_unit))]) add(`${reg} ${bu}`, rr.filter((r) => r.business_unit === bu));
   }
+  const avgBench = (rr, k, min) => { const xs = rr.map((r) => r.bench[k]).filter((v) => v !== null); return xs.length >= min ? round(xs.reduce((a, b) => a + b, 0) / xs.length, 2) : null; };
   const avgOf = (rr, k, min = 1) => { const xs = rr.map((r) => r[k]).filter((v) => v !== null); return xs.length >= min ? round(xs.reduce((a, b) => a + b, 0) / xs.length, 2) : null; };
   table(pb, 4, [
     { h: 'Group', w: 18, v: (g) => g.label },
@@ -349,6 +398,9 @@ export async function buildTrackerWorkbook(ExcelJS, portfolio, rows, opts = {}) 
     { h: 'Avg Self Current', w: 10, num: true, v: (g) => avgOf(g.rr, 'self_current') },
     { h: 'Avg Validated Current', w: 10, num: true, v: (g) => avgOf(g.rr, 'validated_current', model.benchmarks.min_records_for_average) },
     { h: 'Avg 2027 Target', w: 10, num: true, v: (g) => avgOf(g.rr, 'country_target') },
+    { h: 'Avg YoY Self (provisional)', w: 11, num: true, v: (g) => avgBench(g.rr, 'yoy_self', 1) },
+    { h: 'Avg YoY Validated', w: 10, num: true, v: (g) => avgBench(g.rr, 'yoy', model.benchmarks.min_records_for_average) },
+    { h: 'Markets with 2025 Result', w: 10, v: (g) => g.rr.filter((r) => r.bench.yoy_self !== null || r.bench.yoy !== null).length },
   ], groups, { filter: false });
 
   // ---- History Reconciliation --------------------------------------------------------------
