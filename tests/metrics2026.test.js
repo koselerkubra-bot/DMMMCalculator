@@ -72,3 +72,24 @@ test('Blank Sign-up identity falls back to the file name, with a warning', async
   assert.deepEqual(identityFromFileName('DMMM 2026 - Czech Republic Seeds.xlsx', resolver), { market: 'Czech Republic', bu: 'Seeds' });
   assert.equal(identityFromFileName('report.xlsx', resolver).market, null);
 });
+
+test('SEO Health Score written as "69 (3)": the GDM level in brackets is used, no conflict', async () => {
+  const BG = ['CP', 'EUR', 'Bulgaria', 0, 0, 2, 2, 1, '69 (3)', 2, 4, 2, 2, 'origin CWV'];
+  const GR = ['CP', 'EUR', 'Greece', 0, 0, 2, 2, 1, '83 (4)', 2, 4, 2, 2, 'origin CWV'];
+  const p = new Portfolio(cfg);
+  await p.addCountryFile(await makeCountryWorkbook(cfg, { market: 'Bulgaria', bu: 'CP' }), 'bg.xlsm');
+  await p.addCountryFile(await makeCountryWorkbook(cfg, { market: 'Greece', bu: 'CP' }), 'gr.xlsm');
+  const m = await p.setGlobalMetrics(await makeMetrics2026Workbook([BG, GR]), 'gm.xlsx');
+  const bgProp = buildProposal(skill(69), m.rows.find((r) => r.identity.country_id === 'BG').values[69], cfg);
+  assert.equal(bgProp.proposed_level, 3);
+  assert.equal(bgProp.raw_value, 69);
+  assert.equal(bgProp.derived_from_raw, 2);
+  assert.match(bgProp.notes[0], /given by GDM/);
+  const rows = p.compute();
+  const bg = rows.find((r) => r.identity.country_id === 'BG').gdm.rows.get(69);
+  const gr = rows.find((r) => r.identity.country_id === 'GR').gdm.rows.get(69);
+  assert.equal(bg.final_value, 3);
+  assert.equal(bg.final_state, 'resolved');
+  assert.equal(gr.final_value, 4);
+  assert.equal(gr.final_state, 'resolved');
+});

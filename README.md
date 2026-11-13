@@ -35,6 +35,8 @@ Exclude (N/A)), save, and load the tracker again.
   2025 positions (region, BU, market).
 - If the file has only the raw SEMrush score (e.g. "SEO Health Score", 0-100), the SEO level is derived from the
   thresholds. A Level 4 derived this way is a candidate and waits for Global verification in the Validation Queue.
+- If the cell holds the score and the GDM level together, e.g. `69 (3)`, the level in brackets is used as given and
+  the score is kept as the raw value; Details shows when the thresholds would give a different level.
 - If a country workbook has an empty Sign-up market or BU, they are taken from the file name (e.g.
   `DMMM_2026_GERMANY_CP.xlsm`) and a warning is shown.
 - GDM values 0-4 from the Global Metrics file are accepted automatically (policy in `threshold_config_2026.json`);

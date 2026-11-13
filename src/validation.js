@@ -171,6 +171,24 @@ function proposalFromRaw(p, skillCfg, metricVal, scale, cfg) {
   if (mcfg.not_applicable_values.map(norm).includes(norm(metricVal.raw_value))) {
     p.state = 'na'; p.notes.push(`GDM marked ${metricVal.raw_value}`); return p;
   }
+  // "69 (3)": SEMrush score with the level the GDM assigned. The GDM level is used as given.
+  const withLevel = String(metricVal.raw_value).trim().match(/^(\d+(?:[.,]\d+)?)\s*\(\s*(\d(?:[.,]\d+)?)\s*\)$/);
+  if (withLevel) {
+    const rawGiven = parseNumber(withLevel[1]);
+    const lv = parseLevel(withLevel[2], mcfg.not_applicable_values);
+    if (lv.status !== 'ok') { p.state = 'invalid'; p.notes.push(`Level in "${metricVal.raw_value}" is not 0-4`); return p; }
+    p.raw_value = rawGiven;
+    p.level_raw = lv.value;
+    p.proposed_level = lv.value;
+    p.state = 'proposed';
+    p.level_given_by_gdm = true;
+    const band = bandFor(rawGiven, scale);
+    p.derived_from_raw = band ? band.level : null;
+    p.notes.push(`Level ${lv.value} given by GDM with ${p.raw_metric || skillCfg.raw_column} ${rawGiven}` +
+      (band && band.level !== lv.value ? ` (the ${cfg.thresholds.version} thresholds would give ${band.level})` : ''));
+    p.l4_verified_in_data = lv.value === 4 || l4VerifiedRaw(metricVal, cfg);
+    return p;
+  }
   const rawNum = parseNumber(metricVal.raw_value);
   if (rawNum === null) { p.state = 'invalid'; p.notes.push(`${p.raw_metric || skillCfg.raw_column} is "${metricVal.raw_value}" (not numeric)`); return p; }
   const band = bandFor(rawNum, scale);
