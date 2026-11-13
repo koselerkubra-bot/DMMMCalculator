@@ -318,8 +318,8 @@ export async function buildTrackerWorkbook(ExcelJS, portfolio, rows, opts = {}) 
     { h: 'Template Detected', w: 16, v: (x) => (x.s ? (x.s.template_ok ? `DMMM ${model.assessment_year} (${x.s.capability_boundaries_source})` : 'Not a valid 2026 template') : null) },
     { h: 'Skills Parsed', w: 7, v: (x) => x.s?.skills.length ?? null },
     { h: 'Country Skills Included', w: 8, v: (x) => x.own?.length ?? null },
-    { h: 'Missing Self (K)', w: 8, v: (x) => (x.own ? x.own.filter((k) => k.self_current === null).length : null) },
-    { h: 'Missing Target (L)', w: 8, v: (x) => (x.own ? x.own.filter((k) => k.country_target === null).length : null) },
+    { h: 'Skipped: blank self (K)', w: 9, v: (x) => (x.own ? x.own.filter((k) => k.self_current === null).length : null) },
+    { h: 'Target = self (blank L)', w: 9, v: (x) => (x.own ? x.own.filter((k) => k.self_current !== null && k.country_target === null).length : null) },
     { h: 'Excluded P=0', w: 7, v: (x) => x.s?.skills.filter((k) => k.inclusion === 0).length ?? null },
     { h: 'Country Input Completeness', w: 22, status: true, v: (x) => (x.r && x.r.sub === x.s ? x.r.country_status : null) },
     { h: 'Version', w: 7, v: (x) => x.s?.version ?? null },
@@ -449,11 +449,11 @@ export async function buildTrackerWorkbook(ExcelJS, portfolio, rows, opts = {}) 
   const ab = wb.addWorksheet('About');
   title(ab, 'How to read this tracker');
   const about = [
-    ['2026 Self Current', 'Mean of the 9 capability scores, each the mean of the country-owned skills (column K) with P = 1. GDM-managed rows are not part of it.'],
-    ['2026 Validated Current', 'Same, plus the GDM values for the GDM-managed rows. Shown only when country input is Complete and GDM status is Validated.'],
-    ['2027 Target Maturity', 'Country-owned targets (column L) of included skills. Global never sets or changes targets.'],
+    ['2026 Self Current', 'Mean of the capability scores, each the mean of the country-owned skills (column K) with P = 1. GDM-managed rows are not part of it. A skill with a blank K is left out as if it were not there; a capability with no rated skills is left out of the mean.'],
+    ['2026 Validated Current', 'Same, plus the GDM values for the GDM-managed rows. Shown only when the country has started and GDM status is Validated.'],
+    ['2027 Target Maturity', 'Country-owned targets (column L) of included skills. A blank L takes the 2026 self-rating of that skill. Global never sets or changes targets.'],
     ['P = 0', 'The skill is removed from numerator and denominator. A rating of 0 is a valid score and is averaged.'],
-    ['Country Input Status', 'Complete | Incomplete country-owned inputs | Not started | Template error | Identity error | Duplicate - choose active version.'],
+    ['Country Input Status', 'Complete | Not started | Template error | Identity error | Duplicate - choose active version. Blank ratings or targets do not block the calculation.'],
     ['GDM Validation Status', 'Pending Global Data | Ready for Global review | Validation conflict | Validated. Independent of country input status.'],
     ['Regional AVG rows', 'Live Excel formulas over the rows above them.'],
     ['Saving progress', 'This file is the saved state. Upload it to the tool together with new country workbooks to append them; earlier inputs are kept as versions.'],

@@ -248,7 +248,7 @@ function renderResults() {
       <td>${gauge(r.self_current, r.country_target, r.validated_current)}</td>
       <td class="num">${fmt(r.self_current)}</td><td class="num">${fmt(r.validated_current)}</td><td class="num">${fmt(r.country_target)}</td>
       <td>${r.needs_choice ? '–' : !portfolio.history ? '<span class="sub">Load 2025 tracker</span>' : yoy(r.history.overall['2025 Current Maturity'], r.bench.yoy, r.bench.yoy_self)}</td>
-      <td>${pill(r.country_status)}${r.missing_self.length || r.missing_target.length ? `<br><span class="sub">${r.missing_self.length} self, ${r.missing_target.length} target missing</span>` : ''}</td>
+      <td>${pill(r.country_status)}${r.missing_self.length || r.missing_target.length ? `<br><span class="sub">${[r.missing_self.length ? `${r.missing_self.length} skipped (no self)` : '', r.missing_target.length ? `${r.missing_target.length} target = self` : ''].filter(Boolean).join(', ')}</span>` : ''}</td>
       <td>${r.needs_choice ? '–' : `${pill(r.gdm_status)}${r.gdm.pending ? `<br><span class="sub">${r.gdm.pending} Global row${r.gdm.pending === 1 ? '' : 's'} open</span>` : ''}`}</td>
       <td class="actions-cell"><button class="link" type="button" data-detail="${esc(r.key)}">Details</button><br><button class="link" type="button" data-country="${esc(r.key)}">Country file</button></td>
     </tr>`).join('')}</tbody>`;
@@ -274,7 +274,7 @@ function openDetail(r) {
     const g = r.gdm.rows.get(s.row);
     return `<tr class="${s.owner === 'gdm' ? 'row-gdm' : ''} ${s.inclusion === 0 ? 'row-p0' : ''}"><td class="num">${s.row}</td><td>${esc(s.skill)}</td><td>${s.owner === 'gdm' ? 'GDM' : 'Country'}</td><td class="num">${s.inclusion ?? ''}</td><td class="num">${s.self_current ?? '–'}</td><td class="num">${s.country_target ?? '–'}</td><td class="num">${g?.proposal.proposed_level ?? ''}</td><td class="num">${g?.final_value ?? ''}</td><td>${g ? esc(g.status) : ''}</td><td class="wrap sub">${esc([...(g?.proposal.notes || []), g?.note, ...s.issues].filter(Boolean).join(' · '))}</td></tr>`;
   }).join('');
-  const missing = [...r.missing_self.map((s) => `Row ${s.row} ${s.skill}: no self-rating`), ...r.missing_target.map((s) => `Row ${s.row} ${s.skill}: no target`)];
+  const missing = [...r.missing_self.map((s) => `Row ${s.row} ${s.skill}: no self-rating, left out of the calculation`), ...r.missing_target.map((s) => `Row ${s.row} ${s.skill}: no target, this year's rating (${s.self_current}) used as target`)];
   $('#detail-body').innerHTML = `
     <div><span>${pill(r.country_status)}</span> <span>${r.needs_choice ? '' : pill(r.gdm_status)}</span></div>
     ${missing.length ? `<div class="alert bad"><h3>Country inputs to complete</h3><ul>${missing.map((m) => `<li>${esc(m)}</li>`).join('')}</ul></div>` : ''}

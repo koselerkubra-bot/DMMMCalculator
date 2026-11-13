@@ -31,6 +31,10 @@ Exclude (N/A)), save, and load the tracker again.
 - **Self Current**: country-owned rows, column K. **Target +1Y**: column L. Global never writes targets.
 - **Validated Current**: country rows + GDM values for the 10 GDM-managed rows; only when every GDM row is
   resolved and the country input is complete.
+- Blank self-rating (K) on a country-owned skill: the skill is left out of the calculation as if it were not there; it
+  does not make the input incomplete. A capability with no rated skills is left out of the overall mean.
+- Blank target (L) on a country-owned skill that has a self-rating: the 2026 self-rating is used as the target.
+- Only a workbook with no self-ratings at all is "Not started".
 - Global Metrics identity columns are found by header (BU / REGION / COUNTRY); files without these headers use the
   2025 positions (region, BU, market).
 - If the file has only the raw SEMrush score (e.g. "SEO Health Score", 0-100), the SEO level is derived from the

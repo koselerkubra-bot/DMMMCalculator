@@ -71,13 +71,38 @@ test('P=0 removes the skill from numerator and denominator; a rating of 0 is a v
   close(pdm.self_current, 27 / 10);
 });
 
-test('missing included country rating -> Incomplete, but other scores still shown', async () => {
-  const s = await parse({ k: (row, sk) => (sk.owner === 'gdm' || row === 6 ? null : 2) });
+test('blank self-rating: the row is left out as if it were not there, input stays Complete', async () => {
+  // Row 6 blank, all other country rows 2 (target 3): self stays 2, row 6 is reported as skipped.
+  const s = await parse({ k: (row, sk) => (sk.owner === 'gdm' || row === 6 ? null : 2), l: (row, sk) => (sk.owner === 'gdm' ? null : 3) });
   const st = countryInputStatus(s);
-  assert.equal(st.status, COUNTRY_STATUS.INCOMPLETE);
+  assert.equal(st.status, COUNTRY_STATUS.COMPLETE);
   assert.deepEqual(st.missingSelf.map((x) => x.row), [6]);
   const sc = scoreSubmission(s, new Map(), model);
   close(sc.self_current, 2);
+  close(sc.country_target, 3); // row 6's target is not counted either
+  assert.equal(sc.self_skipped, 1);
+});
+
+test('blank target: this year\'s self-rating is used as the target', async () => {
+  // Every country row rated 2; targets blank except row 6 = 4. Row 6 sits in the first capability.
+  const s = await parse({ k: (row, sk) => (sk.owner === 'gdm' ? null : 2), l: (row, sk) => (sk.owner === 'gdm' ? null : row === 6 ? 4 : null) });
+  const st = countryInputStatus(s);
+  assert.equal(st.status, COUNTRY_STATUS.COMPLETE);
+  assert.ok(st.missingTarget.length > 0);
+  const sc = scoreSubmission(s, new Map(), model);
+  const cap = sc.capabilities.find((c) => c.n_target_valid > 0 && c.country_target > 2);
+  assert.ok(cap, 'the capability with row 6 is above 2');
+  for (const c of sc.capabilities.filter((x) => x !== cap)) close(c.country_target, 2);
+  assert.equal(sc.target_from_self, st.missingTarget.length);
+});
+
+test('a capability with no self-ratings is left out of the overall instead of blanking it', async () => {
+  const s = await parse({ k: (row, sk) => (sk.owner === 'gdm' ? null : sk.capability_id === 'IMP' ? null : 3), l: () => null });
+  const sc = scoreSubmission(s, new Map(), model);
+  assert.equal(sc.capabilities.find((c) => c.id === 'IMP').self_current, null);
+  close(sc.self_current, 3);
+  close(sc.country_target, 3);
+  assert.deepEqual(sc.capabilities_without_data.length, 1);
 });
 
 test('missing rating on an excluded skill does not make the input incomplete', async () => {

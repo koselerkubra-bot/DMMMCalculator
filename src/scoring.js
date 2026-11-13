@@ -9,7 +9,12 @@
 //  * Country Target   = column L of included rows the country filled (GDM rows only if the
 //                       country entered a target there). Global never writes targets.
 //  * Validated Current = country-owned K + GDM-resolved values for GDM-managed rows. It exists
-//                       only when every included GDM row is resolved and country input is complete.
+//                       only when every included GDM row is resolved.
+//  * Blank self-rating (K) on a country-owned row: the row is treated as if it were not there
+//    (left out of self, target and validated). It does not make the input incomplete.
+//  * Blank target (L) on a country-owned row that has a self-rating: the self-rating is used as
+//    the target ("stay at this year's level").
+//  * A capability with no usable rows is left out of the overall mean instead of blanking it.
 
 import { mean } from './util.js';
 
@@ -34,11 +39,10 @@ export function countryInputStatus(sub) {
   if (!sub.template_ok) return { status: COUNTRY_STATUS.TEMPLATE_ERROR, missingSelf: [], missingTarget: [] };
   if (!sub.key) return { status: COUNTRY_STATUS.IDENTITY_ERROR, missingSelf: [], missingTarget: [] };
   const own = sub.skills.filter((s) => s.owner === 'country' && s.inclusion === 1);
-  const missingSelf = own.filter((s) => s.self_current === null);
-  const missingTarget = own.filter((s) => s.country_target === null);
-  let status = COUNTRY_STATUS.COMPLETE;
-  if (missingSelf.length === own.length && missingTarget.length === own.length) status = COUNTRY_STATUS.NOT_STARTED;
-  else if (missingSelf.length || missingTarget.length) status = COUNTRY_STATUS.INCOMPLETE;
+  // Informational only: these never block the calculation (see the rules at the top).
+  const missingSelf = own.filter((s) => s.self_current === null);                                 // row skipped
+  const missingTarget = own.filter((s) => s.self_current !== null && s.country_target === null);  // target = self
+  const status = own.length && missingSelf.length === own.length ? COUNTRY_STATUS.NOT_STARTED : COUNTRY_STATUS.COMPLETE;
   return { status, missingSelf, missingTarget };
 }
 
@@ -51,13 +55,16 @@ export function scoreSubmission(sub, gdm, model) {
   const caps = model.capabilities.map((cap) => {
     const skills = sub.skills.filter((s) => s.capability_id === cap.id);
     const included = skills.filter((s) => s.inclusion === 1);
-    const ownIncl = included.filter((s) => s.owner === 'country');
+    const ownAll = included.filter((s) => s.owner === 'country');
+    const ownIncl = ownAll.filter((s) => s.self_current !== null); // blank K = row not there
     const gdmIncl = included.filter((s) => s.owner === 'gdm');
 
-    const selfVals = ownIncl.map((s) => s.self_current).filter((v) => v !== null);
-    const targetVals = included.map((s) => s.country_target).filter((v) => v !== null);
+    const selfVals = ownIncl.map((s) => s.self_current);
+    const ownTargets = ownIncl.map((s) => (s.country_target !== null ? s.country_target : s.self_current));
+    const gdmTargets = gdmIncl.map((s) => s.country_target).filter((v) => v !== null);
+    const targetVals = [...ownTargets, ...gdmTargets];
 
-    let validatedComplete = ownIncl.every((s) => s.self_current !== null);
+    let validatedComplete = true;
     const validatedVals = [...selfVals];
     let gdmResolved = 0, gdmPending = 0, gdmExcluded = 0;
     for (const s of gdmIncl) {
@@ -73,7 +80,9 @@ export function scoreSubmission(sub, gdm, model) {
       n_skills: skills.length,
       n_included: included.length,
       n_excluded_p0: skills.length - included.length,
-      n_country_included: ownIncl.length,
+      n_country_included: ownAll.length,
+      n_self_skipped: ownAll.length - ownIncl.length,
+      n_target_from_self: ownIncl.filter((s) => s.country_target === null).length,
       n_gdm_included: gdmIncl.length,
       n_self_valid: selfVals.length,
       n_target_valid: targetVals.length,
@@ -86,13 +95,21 @@ export function scoreSubmission(sub, gdm, model) {
     };
   });
 
-  const all = (k) => (caps.every((c) => c[k] !== null) ? mean(caps.map((c) => c[k])) : null);
+  // Capabilities with nothing to score are left out; the overall is the mean of the others.
+  const all = (k) => {
+    const vals = caps.map((c) => c[k]).filter((v) => v !== null);
+    return vals.length ? mean(vals) : null;
+  };
   return {
     capabilities: caps,
     self_current: all('self_current'),
     country_target: all('country_target'),
-    validated_current: all('validated_current'),
+    // Validated needs every included GDM row resolved: one pending row anywhere blanks it.
+    validated_current: caps.some((c) => c.gdm_pending > 0) ? null : all('validated_current'),
     gdm_rows_pending: caps.reduce((a, c) => a + c.gdm_pending, 0),
     excluded_p0: caps.reduce((a, c) => a + c.n_excluded_p0, 0),
+    self_skipped: caps.reduce((a, c) => a + c.n_self_skipped, 0),
+    target_from_self: caps.reduce((a, c) => a + c.n_target_from_self, 0),
+    capabilities_without_data: caps.filter((c) => c.self_current === null).map((c) => c.name),
   };
 }
