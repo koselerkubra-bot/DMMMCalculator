@@ -207,3 +207,6 @@ dialog::backdrop { background: rgba(26, 32, 44, .5); }
   .stat { min-width: calc(50% - 6px); }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* Targets that include blank column L cells filled with the 2026 self-rating */
+.assumed { color: var(--water); font-style: italic; }

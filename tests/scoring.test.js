@@ -152,3 +152,13 @@ test('a DMMM 2025 workbook is rejected with one clear message', async () => {
   assert.match(errs[0].message, /DMMM 2025 workbook/);
   assert.equal(s.skills.length, 0, 'nothing is read from a wrong template');
 });
+
+test('target note: says when all or some targets were taken from the self-rating', async () => {
+  const { targetNote } = await import('../src/portfolio.js');
+  const none = await parse({ k: (row, sk) => (sk.owner === 'gdm' ? null : 2), l: () => null });
+  assert.match(targetNote(scoreSubmission(none, new Map(), model)), /^No targets set/);
+  const some = await parse({ k: (row, sk) => (sk.owner === 'gdm' ? null : 2), l: (row, sk) => (sk.owner === 'gdm' || row === 6 ? null : 3) });
+  assert.match(targetNote(scoreSubmission(some, new Map(), model)), /^1 of \d+ targets not set/);
+  const full = await parse({});
+  assert.equal(targetNote(scoreSubmission(full, new Map(), model)), null);
+});

@@ -34,6 +34,7 @@ Exclude (N/A)), save, and load the tracker again.
 - Blank self-rating (K) on a country-owned skill: the skill is left out of the calculation as if it were not there; it
   does not make the input incomplete. A capability with no rated skills is left out of the overall mean.
 - Blank target (L) on a country-owned skill that has a self-rating: the 2026 self-rating is used as the target.
+  Targets that include such values are shown in blue italics (tool and tracker) with a note, e.g. "No targets set".
 - Only a workbook with no self-ratings at all is "Not started".
 - Global Metrics identity columns are found by header (BU / REGION / COUNTRY); files without these headers use the
   2025 positions (region, BU, market).

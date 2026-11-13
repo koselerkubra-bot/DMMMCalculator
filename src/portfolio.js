@@ -9,6 +9,16 @@ import { scoreSubmission, countryInputStatus, COUNTRY_STATUS, GDM_STATUS } from 
 import { IdentityResolver } from './identity.js';
 import { mean, round, nowIso } from './util.js';
 
+/** Short note when some or all 2027 targets were taken from the 2026 self-ratings (blank column L). */
+export function targetNote(scores) {
+  const n = scores.target_from_self;
+  if (!n) return null;
+  const rated = scores.capabilities.reduce((a, c) => a + c.n_country_included - c.n_self_skipped, 0);
+  return n >= rated
+    ? 'No targets set: 2027 target = 2026 self-rating'
+    : `${n} of ${rated} targets not set: 2026 self-rating used for those`;
+}
+
 export class Portfolio {
   constructor(cfg) {
     this.cfg = cfg;
@@ -144,6 +154,7 @@ export class Portfolio {
         country_status: choice ? COUNTRY_STATUS.DUPLICATE : ci.status,
         missing_self: ci.missingSelf,
         missing_target: ci.missingTarget,
+        target_note: targetNote(scores),
         gdm,
         gdm_status: choice ? '-' : gdm.status,
         scores,

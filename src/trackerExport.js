@@ -7,6 +7,7 @@ import { DECISION_OPTIONS } from './validation.js';
 
 export const STATE_FORMAT = 'dmmm-tracker-state/1';
 const FONT = 'Arial';
+const ASSUMED = 'FF00A3E0'; // blue: value includes targets taken from the self-rating
 const C = {
   // Syngenta palette: Super Green 009F3C, Deep Blue 36398E, Sunlight F4A000, Earth E24A1E, neutrals
   ink: 'FF1A202C', header: 'FF009F3C', headerGdm: 'FF36398E', headerHist: 'FF64748B', headerText: 'FFFFFFFF',
@@ -37,8 +38,9 @@ export function resultColumns(model) {
   cols.push(
     { h: '2026 Self Current', w: 11, g: 'country', num: true, v: (r) => r2(r.self_current) },
     { h: '2026 Validated Current', w: 11, g: 'gdm', num: true, v: (r) => r2(r.validated_current) },
-    { h: '2027 Target Maturity', w: 11, g: 'country', num: true, v: (r) => r2(r.country_target) },
+    { h: '2027 Target Maturity', w: 11, g: 'country', num: true, v: (r) => r2(r.country_target), blue: (r) => !!r.target_note },
     { h: 'Country Input Status', w: 22, g: 'country', status: true, v: (r) => r.country_status },
+    { h: 'Target Note', w: 30, g: 'country', wrap: true, v: (r) => r.target_note, blue: (r) => !!r.target_note },
     { h: 'GDM Validation Status', w: 20, g: 'gdm', status: true, v: (r) => r.gdm_status },
     { h: 'Global Rows Pending', w: 9, g: 'gdm', v: (r) => (r.needs_choice ? null : r.gdm.pending) },
     { h: 'YoY vs 2025 (validated)', w: 10, g: 'bench', num: true, v: (r) => r2(r.bench.yoy) },
@@ -58,7 +60,7 @@ export function resultColumns(model) {
     cols.push(
       { h: `2026 ${n} Self`, w: 9, g: 'country', num: true, v: (r) => (r.needs_choice ? null : r2(capOf(r).self_current)) },
       { h: `2026 ${n} Validated`, w: 9, g: 'gdm', num: true, v: (r) => (r.validated_current === null ? null : r2(capOf(r).validated_current)) },
-      { h: `2027 ${n} Goal`, w: 9, g: 'country', num: true, v: (r) => (r.needs_choice ? null : r2(capOf(r).country_target)) },
+      { h: `2027 ${n} Goal`, w: 9, g: 'country', num: true, v: (r) => (r.needs_choice ? null : r2(capOf(r).country_target)), blue: (r) => !r.needs_choice && capOf(r).n_target_from_self > 0 },
     );
   }
   for (const gq of model.general_questions) cols.push({ h: gq.label, w: 14, g: 'info', v: (r) => r.sub.general?.[gq.key] ?? null });
@@ -103,7 +105,7 @@ function table(ws, startRow, cols, rows, opts = {}) {
       const cell = xr.getCell(i + 1);
       const v = c.v(row);
       cell.value = v === undefined ? null : v;
-      cell.font = { name: FONT, size: 9, color: { argb: C.ink } };
+      cell.font = { name: FONT, size: 9, color: { argb: c.blue && c.blue(row) ? ASSUMED : C.ink }, italic: !!(c.blue && c.blue(row)) };
       if (c.num) cell.numFmt = '0.00';
       if (c.status && STATUS_FILL[v]) cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: STATUS_FILL[v] } };
       if (c.edit) cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: C.edit } };
@@ -452,6 +454,7 @@ export async function buildTrackerWorkbook(ExcelJS, portfolio, rows, opts = {}) 
     ['2026 Self Current', 'Mean of the capability scores, each the mean of the country-owned skills (column K) with P = 1. GDM-managed rows are not part of it. A skill with a blank K is left out as if it were not there; a capability with no rated skills is left out of the mean.'],
     ['2026 Validated Current', 'Same, plus the GDM values for the GDM-managed rows. Shown only when the country has started and GDM status is Validated.'],
     ['2027 Target Maturity', 'Country-owned targets (column L) of included skills. A blank L takes the 2026 self-rating of that skill. Global never sets or changes targets.'],
+    ['Blue italic values', 'Targets that include one or more blank L cells filled with the 2026 self-rating. The Target Note column says how many.'],
     ['P = 0', 'The skill is removed from numerator and denominator. A rating of 0 is a valid score and is averaged.'],
     ['Country Input Status', 'Complete | Not started | Template error | Identity error | Duplicate - choose active version. Blank ratings or targets do not block the calculation.'],
     ['GDM Validation Status', 'Pending Global Data | Ready for Global review | Validation conflict | Validated. Independent of country input status.'],
