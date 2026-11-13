@@ -34,11 +34,22 @@ export function detectMetricsLayout(sheet, mcfg) {
       const raw = s.raw_column ? firstCol([s.raw_column, ...(s.raw_aliases || [])]) : null;
       const l4 = findCol([s.column + mcfg.level4_verification.column_suffix, ...(s.aliases || []).map((a) => a + mcfg.level4_verification.column_suffix)]);
       columns[s.row] = { level: col, raw, l4, header: col ? row[col - 1] : null, raw_header: raw ? row[raw - 1] : null };
-      if (!col) missing.push(s.column);
+      if (!col && !(raw && s.threshold)) missing.push(s.column);
     }
     const info = {};
     for (const name of mcfg.informational_columns) { const col = firstCol([name]); if (col) info[name] = col; }
-    return { headerRow: r, columns, missing, info };
+    // Identity columns: by header when the file has them (2026 layout: BU, REGION, COUNTRY),
+    // otherwise the fixed positions of the 2025 layout (region, BU, market).
+    const identity = { ...mcfg.identity_columns };
+    let identitySource = 'fixed';
+    const ih = mcfg.identity_headers || {};
+    const byHeader = {};
+    for (const k of ['region', 'business_unit', 'market']) byHeader[k] = ih[k] ? firstCol(ih[k]) : null;
+    if (byHeader.market && byHeader.business_unit) {
+      Object.assign(identity, Object.fromEntries(Object.entries(byHeader).filter(([, v]) => v)));
+      identitySource = 'header';
+    }
+    return { headerRow: r, columns, missing, info, identity, identitySource };
   }
   return null;
 }
@@ -89,7 +100,8 @@ export async function importGlobalMetrics(bytes, fileName, cfg, resolver, opts =
     imp.issues.push({ level: 'warning', message: `The file name mentions ${y[1]}. Its values are applied to the ${cfg.model.assessment_year} assessments.` });
   }
 
-  const idc = mcfg.identity_columns;
+  const idc = layout.identity;
+  imp.identity_columns = { ...idc, source: layout.identitySource };
   const seen = new Map();
   for (let r = layout.headerRow + 1; r <= sheet.maxRow; r++) {
     const market = sheet.at(r, idc.market);
@@ -124,6 +136,7 @@ export async function importGlobalMetrics(bytes, fileName, cfg, resolver, opts =
         raw_value: rawRaw,
         l4_verified_raw: l4Raw,
         column_present: !!cols.level,
+        raw_present: !!cols.raw,
       };
     }
     for (const [name, col] of Object.entries(layout.info)) rec.informational[name] = sheet.at(r, col);
@@ -135,6 +148,43 @@ export async function importGlobalMetrics(bytes, fileName, cfg, resolver, opts =
     imp.rows.push(rec);
   }
   return imp;
+}
+
+function bandFor(value, scale) {
+  for (const b of scale.bands) {
+    const okMin = b.min === undefined || value >= b.min;
+    const okMax = b.max_exclusive === undefined || value < b.max_exclusive;
+    if (okMin && okMax) return b;
+  }
+  return null;
+}
+
+function l4VerifiedRaw(metricVal, cfg) {
+  const acc = cfg.metrics.level4_verification.accepted_values.map(norm);
+  return !isBlank(metricVal.l4_verified_raw) && acc.includes(norm(metricVal.l4_verified_raw));
+}
+
+/** The file has only the raw metric (e.g. SEMrush Health Score): derive the level from the thresholds. */
+function proposalFromRaw(p, skillCfg, metricVal, scale, cfg) {
+  const mcfg = cfg.metrics;
+  if (isBlank(metricVal.raw_value)) { p.notes.push('No value yet'); return p; }
+  if (mcfg.not_applicable_values.map(norm).includes(norm(metricVal.raw_value))) {
+    p.state = 'na'; p.notes.push(`GDM marked ${metricVal.raw_value}`); return p;
+  }
+  const rawNum = parseNumber(metricVal.raw_value);
+  if (rawNum === null) { p.state = 'invalid'; p.notes.push(`${p.raw_metric || skillCfg.raw_column} is "${metricVal.raw_value}" (not numeric)`); return p; }
+  const band = bandFor(rawNum, scale);
+  if (!band) { p.state = 'invalid'; p.notes.push(`${p.raw_metric || skillCfg.raw_column} ${rawNum} is outside the threshold bands`); return p; }
+  p.derived_from_raw = band.level;
+  p.proposed_level = band.level;
+  p.state = 'proposed';
+  p.notes.push(`Level derived from ${p.raw_metric || skillCfg.raw_column} ${rawNum} (thresholds ${cfg.thresholds.version})`);
+  p.l4_verified_in_data = l4VerifiedRaw(metricVal, cfg);
+  if (band.level === 4 && band.level4_candidate_only) {
+    p.l4_candidate_only = true;
+    if (!p.l4_verified_in_data) p.notes.push(`Level 4 candidate: ${scale.level4_conditions || 'additional conditions apply'}`);
+  }
+  return p;
 }
 
 /** Build the proposal for one GDM-managed row from an imported metrics record. */
@@ -153,6 +203,8 @@ export function buildProposal(skillCfg, metricVal, cfg) {
     notes: [],
   };
   if (!metricVal) { p.notes.push('Market not in the Global Metrics file'); return p; }
+  const scale = skillCfg.threshold ? cfg.thresholds.raw_scales[skillCfg.threshold] : null;
+  if (!metricVal.column_present && metricVal.raw_present && scale) return proposalFromRaw(p, skillCfg, metricVal, scale, cfg);
   if (!metricVal.column_present) { p.notes.push(`Column "${skillCfg.column}" not in the Global Metrics file`); return p; }
   const lv = parseLevel(metricVal.level_raw, mcfg.not_applicable_values);
   if (lv.status === 'missing') { p.notes.push('No value yet'); return p; }
@@ -230,7 +282,9 @@ export function resolveSubmission(sub, metricsRec, decisions, cfg) {
       else if (prop.state === 'conflict') { r.status = 'Conflict: GDM level vs raw metric'; r.final_state = 'conflict'; }
       else if (prop.state === 'invalid') { r.status = 'Invalid GDM value'; r.final_state = 'conflict'; }
       else if (prop.state === 'na') { r.status = 'GDM marked N/A - decision needed'; r.final_state = 'review'; }
-      else if (prop.proposed_level === 4 && policy.level4_requires_explicit_verification && !prop.l4_verified_in_data) {
+      else if (prop.proposed_level === 4 && prop.l4_candidate_only && !prop.l4_verified_in_data) {
+        r.status = 'Level 4 candidate from raw metric - Global verification needed'; r.final_state = 'review';
+      } else if (prop.proposed_level === 4 && policy.level4_requires_explicit_verification && !prop.l4_verified_in_data) {
         r.status = 'Level 4 - awaiting Global verification'; r.final_state = 'review';
       } else if (prop.proposed_level === 4) {
         r.final_value = 4; r.final_state = 'resolved'; r.status = prop.l4_verified_in_data || policy.level4_requires_explicit_verification ? 'Level 4 verified in GDM data' : 'Accepted from Global Metrics (Level 4)';

@@ -1,6 +1,6 @@
 {
-  "version": "2026.1",
-  "note": "Maps columns of the Global Metrics file (2025 'All Global Metrics' layout, extended for 2026) to the GDM-managed questionnaire rows. Values in level columns are GDM-assessed maturity levels (0-4) and are used as-is (decimals allowed, as in 2025). Raw columns are re-scored with threshold_config and any difference is reported as a validation conflict. Add aliases here if the column headers change.",
+  "version": "2026.2",
+  "note": "Maps columns of the Global Metrics file (2025 'All Global Metrics' layout, extended for 2026) to the GDM-managed questionnaire rows. Values in level columns are GDM-assessed maturity levels (0-4) and are used as-is (decimals allowed, as in 2025). Raw columns are re-scored with threshold_config and any difference is reported as a validation conflict. Add aliases here if the column headers change. Identity columns are found by header (BU / REGION / COUNTRY) when present, otherwise identity_columns is used (2025 layout: region, BU, market). If a skill has no level column but has a raw column with a threshold, the level is derived from the raw value.",
   "identity_columns": {
     "region": 1,
     "business_unit": 2,
@@ -69,7 +69,8 @@
       "column": "Web Performance & Accessibility",
       "aliases": [
         "Web Performance",
-        "Lighthouse / Accessibility"
+        "Lighthouse / Accessibility",
+        "Technical UX Health"
       ],
       "new_in_2026": true
     },
@@ -85,7 +86,8 @@
       "raw_aliases": [
         "SEMrush",
         "SEM Rush score",
-        "SEMrush Health Score"
+        "SEMrush Health Score",
+        "SEO Health Score"
       ],
       "threshold": "technical_seo_health"
     },
@@ -95,7 +97,8 @@
       "column": "Core Web Vitals & Page Experience",
       "aliases": [
         "Core Web Vitals",
-        "CWV"
+        "CWV",
+        "Web Vitals & Page Experience"
       ],
       "new_in_2026": true
     },
@@ -135,7 +138,8 @@
     "Global Campaign Dashboard",
     "% Grower data",
     "Cropwise active users  AMEA Only",
-    "GA4 Property audit"
+    "GA4 Property audit",
+    "Assessment basis"
   ],
   "level4_verification": {
     "column_suffix": " L4 Verified",
@@ -147,5 +151,19 @@
       "VERIFIED"
     ],
     "note": "A proposed Level 4 is only final when GDM confirms it: either a '<column> L4 Verified' column says Yes, or the reviewer approves it in the Validation Queue."
+  },
+  "identity_headers": {
+    "region": [
+      "REGION"
+    ],
+    "business_unit": [
+      "BU",
+      "BUSINESS UNIT"
+    ],
+    "market": [
+      "COUNTRY",
+      "MARKET",
+      "MARKET/COUNTRY"
+    ]
   }
 }

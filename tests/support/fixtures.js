@@ -90,3 +90,13 @@ export async function makeHistoryWorkbook(rows) {
   ws.getRow(6 + rows.length + 1).values = [null, 'Total ', 'Overall Average', 1.9];
   return new Uint8Array(await wb.xlsx.writeBuffer());
 }
+
+/** Global Metrics file in the 2026 GDM layout: BU, REGION, COUNTRY, then level columns; SEO Health Score is raw. */
+export async function makeMetrics2026Workbook(rows) {
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('Sheet1');
+  ws.addRow([null, null, null, 'DMS', 'Content Mkt', 'Content Mkt', 'SoME', 'UX', 'SEO', 'SEO', 'SEO', 'Mkt Autom.', 'Mkt Autom.']);
+  ws.addRow(['BU', 'REGION', 'COUNTRY', 'DMS Score Yes = 4, No =0', 'Canva', 'Trinity ', 'Emplifi', 'Technical UX Health', 'SEO Health Score', 'Web Vitals & Page Experience', 'Schema Validity Score', 'Marketing Cloud', 'List Health & Deliverability ', 'Assessment basis']);
+  for (const r of rows) ws.addRow(r);
+  return new Uint8Array(await wb.xlsx.writeBuffer());
+}

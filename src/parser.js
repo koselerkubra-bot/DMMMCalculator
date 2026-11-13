@@ -35,6 +35,21 @@ export function capabilityBoundariesFromSummary(summary, model) {
   return found;
 }
 
+/** Market and BU from a file name such as DMMM_2026_GERMANY_CP.xlsm or DMMM 2026 - Spain Seeds.xlsx. */
+export function identityFromFileName(fileName, resolver) {
+  const base = String(fileName || '').replace(/^.*[\\/]/, '').replace(/\.[^.]+$/, '');
+  const tokens = base.replace(/[_\-]+/g, ' ').split(/\s+/).filter((t) => t && !/^DMMM$/i.test(t) && !/^20\d\d$/.test(t) && !/^V\d+$/i.test(t) && !/^(FINAL|DRAFT|COPY)$/i.test(t));
+  let bu = null;
+  if (tokens.length && resolver.normalizeBU(tokens[tokens.length - 1]).bu) bu = tokens.pop();
+  else if (tokens.length > 1 && /^PROTECTION$/i.test(tokens[tokens.length - 1]) && /^CROP$/i.test(tokens[tokens.length - 2])) { tokens.splice(-2); bu = 'CP'; }
+  // Use the longest leading run of tokens that resolves to a country.
+  for (let n = tokens.length; n > 0; n--) {
+    const cand = tokens.slice(0, n).join(' ');
+    if (resolver.resolveCountry(cand).country) return { market: cand, bu };
+  }
+  return { market: null, bu };
+}
+
 export async function parseCountryWorkbook(bytes, fileName, cfg, resolver, opts = {}) {
   const model = cfg.model;
   const hash = await sha256Hex(bytes);
@@ -77,6 +92,18 @@ export async function parseCountryWorkbook(bytes, fileName, cfg, resolver, opts 
   sub.assessment_date_raw = su.value(ic.assessment_date) ?? null;
   sub.review_date_raw = su.value(ic.review_date) ?? null;
 
+  // Blank Sign-up cells: fall back to the file name (e.g. DMMM_2026_GERMANY_CP.xlsm) and say so.
+  if (isBlank(sub.market_raw) || isBlank(sub.bu_raw)) {
+    const fromName = identityFromFileName(fileName, resolver);
+    if (isBlank(sub.market_raw) && fromName.market) {
+      sub.market_raw = fromName.market;
+      sub.issues.push(issue('warning', 'MARKET_FROM_FILENAME', `Market/Country (Sign-up!D7) is empty; "${fromName.market}" was taken from the file name. Please ask the country to fill in the Sign-up sheet.`));
+    }
+    if (isBlank(sub.bu_raw) && fromName.bu) {
+      sub.bu_raw = fromName.bu;
+      sub.issues.push(issue('warning', 'BU_FROM_FILENAME', `Business Unit (Sign-up!D9) is empty; "${fromName.bu}" was taken from the file name. Please ask the country to fill in the Sign-up sheet.`));
+    }
+  }
   const c = resolver.resolveCountry(sub.market_raw);
   if (c.issue) sub.issues.push(issue('error', 'COUNTRY_UNMATCHED', c.issue));
   const b = resolver.normalizeBU(sub.bu_raw);

@@ -13,7 +13,8 @@ and the repository contains no country data. Never commit real submissions or Gl
 1. Open the GitHub Pages site.
 2. Drop files onto the page. Each file is recognised automatically:
    - **Country workbooks** (DMMM 2026 template, one per country + BU)
-   - **Global Metrics** file (2025 "All Global Metrics" layout, plus the 2026 columns)
+   - **Global Metrics** file: the 2026 GDM layout (BU, REGION, COUNTRY, ... Technical UX Health, SEO Health Score,
+     Web Vitals & Page Experience, Schema Validity Score ...) or the 2025 "All Global Metrics" layout
    - **Saved 2026 tracker** (continue a previous session; applies reviewer decisions)
    - **2025 Global Tracker** (adds 2022-2025 history and the 2026 targets set last year)
 3. Download the tracker. Keep it: it is also the saved state. Next time, load it together with the new
@@ -30,6 +31,12 @@ Exclude (N/A)), save, and load the tracker again.
 - **Self Current**: country-owned rows, column K. **Target +1Y**: column L. Global never writes targets.
 - **Validated Current**: country rows + GDM values for the 10 GDM-managed rows; only when every GDM row is
   resolved and the country input is complete.
+- Global Metrics identity columns are found by header (BU / REGION / COUNTRY); files without these headers use the
+  2025 positions (region, BU, market).
+- If the file has only the raw SEMrush score (e.g. "SEO Health Score", 0-100), the SEO level is derived from the
+  thresholds. A Level 4 derived this way is a candidate and waits for Global verification in the Validation Queue.
+- If a country workbook has an empty Sign-up market or BU, they are taken from the file name (e.g.
+  `DMMM_2026_GERMANY_CP.xlsm`) and a warning is shown.
 - GDM values 0-4 from the Global Metrics file are accepted automatically (policy in `threshold_config_2026.json`);
   reviewers can still Override, Reject or Exclude any row.
 - Country Input Status and GDM Validation Status are independent.
