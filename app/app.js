@@ -8,6 +8,7 @@ import { restoreState } from '../src/stateImport.js';
 import { trackerToBuffer } from '../src/trackerExport.js';
 import { buildCountryWorkbook, countryFileName } from '../src/countryExport.js';
 import { verifyTracker } from '../src/verify.js';
+import { generalQuestionsToBuffer } from '../src/gqExport.js';
 import { GDM_STATUS, COUNTRY_STATUS } from '../src/scoring.js';
 
 const $ = (s) => document.querySelector(s);
@@ -42,6 +43,7 @@ function wire() {
   document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => selectTab(b.dataset.tab)));
   ['#f-region', '#f-bu', '#f-search'].forEach((s) => $(s).addEventListener('input', renderResults));
   $('#download-tracker').addEventListener('click', downloadTracker);
+  $('#download-gq').addEventListener('click', downloadGeneralQuestions);
   $('#clear').addEventListener('click', () => { if (confirm('Remove all loaded files from this session?')) location.reload(); });
   $('#detail-close').addEventListener('click', () => $('#detail').close());
   $('#results-table').addEventListener('click', onResultsClick);
@@ -322,6 +324,21 @@ async function downloadTracker() {
     $('#verify').textContent = `The tracker could not be built: ${e.message}`;
   } finally {
     btn.disabled = false; btn.textContent = 'Download tracker';
+  }
+}
+
+async function downloadGeneralQuestions() {
+  const btn = $('#download-gq');
+  btn.disabled = true; btn.textContent = 'Building file...';
+  try {
+    const buf = await generalQuestionsToBuffer(window.ExcelJS, portfolio, rows);
+    save(buf, `DMMM_${cfg.model.assessment_year}_General_Questions_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  } catch (e) {
+    console.error(e);
+    $('#verify').className = 'verify fail';
+    $('#verify').textContent = `The General Questions file could not be built: ${e.message}`;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Download General Questions';
   }
 }
 

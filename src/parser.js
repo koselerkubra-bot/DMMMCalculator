@@ -1,5 +1,6 @@
 // Parses one DMMM 2026 country workbook into a normalised submission record.
 // The original file is never modified: only cached cell values and formula text are read.
+import { extractGeneral } from './generalQuestions.js';
 import { openWorkbook, colToNum } from './xlsxReader.js';
 import { norm, parseRating, parseFlag, isBlank, sha256Hex, mean, nowIso } from './util.js';
 import { identityKey } from './identity.js';
@@ -191,6 +192,8 @@ export async function parseCountryWorkbook(bytes, fileName, cfg, resolver, opts 
   // ---- General questions (informational) -------------------------------------------------
   const gq = wb.sheet(model.sheets.general);
   if (gq) for (const g of model.general_questions) sub.general[g.key] = gq.value(g.cell) ?? null;
+  // Full read for the separate General Questions export (kept in memory for this session).
+  try { sub.general_detail = gq ? extractGeneral(gq) : null; } catch (e) { sub.general_detail = { error: e.message }; }
 
   // ---- Parse check: reproduce the workbook's own Summary formula from the parsed cells ------
   // The workbook averages Summary column G (= K, blank counted as 0, P ignored). If our reading

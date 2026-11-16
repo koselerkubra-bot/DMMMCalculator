@@ -2,7 +2,8 @@
 // Command-line version of the browser tool, using the same engine.
 //   node cli/build-tracker.mjs --out tracker.xlsx [--state previous_tracker.xlsx]
 //        [--history DMMM_Global_Tracker_2025.xlsx] [--metrics global_metrics.xlsx]
-//        [--choose DE|Seeds|2026=<submission_id>] country1.xlsm country2.xlsm folder/ ...
+//        [--choose DE|Seeds|2026=<submission_id>] [--gq-out general_questions.xlsx]
+//        country1.xlsm country2.xlsm folder/ ...
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,6 +13,7 @@ import { Portfolio } from '../src/portfolio.js';
 import { restoreState } from '../src/stateImport.js';
 import { trackerToBuffer } from '../src/trackerExport.js';
 import { verifyTracker } from '../src/verify.js';
+import { generalQuestionsToBuffer } from '../src/gqExport.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -23,6 +25,7 @@ for (let i = 0; i < args.length; i++) {
   else if (a === '--history') opt.history = args[++i];
   else if (a === '--metrics') opt.metrics = args[++i];
   else if (a === '--choose') opt.choose.push(args[++i]);
+  else if (a === '--gq-out') opt.gqOut = args[++i];
   else opt.countries.push(a);
 }
 if (!opt.out) { console.error('Usage: node cli/build-tracker.mjs --out tracker.xlsx [options] files...'); process.exit(2); }
@@ -45,4 +48,5 @@ for (const r of rows) console.log(`${r.key.padEnd(18)} self ${r.self_current?.to
 console.log(`Consistency check: ${v.ok ? 'passed' : 'FAILED'}`);
 v.checks.filter((c) => !c.ok).forEach((c) => console.log('  FAIL', c.name, c.detail));
 console.log('Written', opt.out);
+if (opt.gqOut) { fs.writeFileSync(opt.gqOut, await generalQuestionsToBuffer(ExcelJS, p, rows)); console.log('Written', opt.gqOut); }
 process.exit(v.ok ? 0 : 1);

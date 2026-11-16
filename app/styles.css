@@ -210,3 +210,8 @@ dialog::backdrop { background: rgba(26, 32, 44, .5); }
 
 /* Targets that include blank column L cells filled with the 2026 self-rating */
 .assumed { color: var(--water); font-style: italic; }
+
+/* Second download action (General Questions) */
+button.secondary { background: var(--blue); color: #fff; border: 0; border-radius: 8px; padding: 11px 18px; font-weight: 700; font-size: 15px; cursor: pointer; }
+button.secondary:hover { filter: brightness(1.1); }
+button.secondary:disabled { opacity: .6; cursor: progress; }

@@ -31,6 +31,12 @@ Exclude (N/A)), save, and load the tracker again.
 - **Self Current**: country-owned rows, column K. **Target +1Y**: column L. Global never writes targets.
 - **Validated Current**: country rows + GDM values for the 10 GDM-managed rows; only when every GDM row is
   resolved and the country input is complete.
+- **Download General Questions** writes a separate Excel file with every General Questions answer, one Summary row per
+  country/BU and a sheet per list (Internal Team, MaSE, Delivery Split, Tools, DM Channels, KPIs, Grower Channels), plus
+  an Adoption sheet (which markets use which tool / platform). Numbers written as text, shares, Yes/No, levels,
+  frequencies, tool and platform names are standardized; every interpretation is listed on the Data Quality sheet.
+  It needs the country workbooks loaded in the same session (a saved tracker alone does not contain these answers).
+  CLI: `--gq-out general_questions.xlsx`.
 - Blank self-rating (K) on a country-owned skill: the skill is left out of the calculation as if it were not there; it
   does not make the input incomplete. A capability with no rated skills is left out of the overall mean.
 - Blank target (L) on a country-owned skill that has a self-rating: the 2026 self-rating is used as the target.
