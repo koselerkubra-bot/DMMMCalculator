@@ -73,7 +73,8 @@ test('2025-format Global Metrics: proposals for current only, targets untouched'
   assert.equal(r.gdm_status, GDM_STATUS.PENDING);
   assert.equal(r.gdm.pending, 4);
   close(r.country_target, 3);
-  for (const s of r.sub.skills) if (s.owner === 'gdm') assert.equal(s.country_target, null);
+  // Global never writes targets: GDM rows keep the country's own target (3 in the fixture).
+  for (const s of r.sub.skills) if (s.owner === 'gdm') assert.equal(s.country_target, 3);
 });
 
 test('full 2026 metrics: GDM values incl. Level 4 are accepted automatically -> Validated', async () => {

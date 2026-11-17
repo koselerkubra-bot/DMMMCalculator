@@ -37,10 +37,13 @@ Exclude (N/A)), save, and load the tracker again.
   frequencies, tool and platform names are standardized; every interpretation is listed on the Data Quality sheet.
   It needs the country workbooks loaded in the same session (a saved tracker alone does not contain these answers).
   CLI: `--gq-out general_questions.xlsx`.
-- Blank self-rating (K) on a country-owned skill: the skill is left out of the calculation as if it were not there; it
-  does not make the input incomplete. A capability with no rated skills is left out of the overall mean.
-- Blank target (L) on a country-owned skill that has a self-rating: the 2026 self-rating is used as the target.
-  Targets that include such values are shown in blue italics (tool and tracker) with a note, e.g. "No targets set".
+- Scores reproduce each workbook's own **Summary outcome** sheet exactly: every capability is the AVERAGE of its
+  questionnaire rows, an empty cell counts as 0, a cell holding text (e.g. a non-breaking space) is ignored and column
+  P is not used; the overall is the AVERAGE of the 9 capabilities. Targets follow the same rules over column L.
+- Validated Current uses the Global Metrics values on the GDM rows; it equals the Summary outcome whenever those
+  values equal the GDM values in the workbook. The tracker shows "Excel Summary Outcome", "Matches Excel" and the
+  reason for any difference (e.g. GDM rows left blank in the workbook). Blank cells are shown in blue with a note.
+- The "Output & Target Level Defintion" sheet of the template is not used.
 - Only a workbook with no self-ratings at all is "Not started".
 - Global Metrics identity columns are found by header (BU / REGION / COUNTRY); files without these headers use the
   2025 positions (region, BU, market).

@@ -44,9 +44,28 @@ function wire() {
   ['#f-region', '#f-bu', '#f-search'].forEach((s) => $(s).addEventListener('input', renderResults));
   $('#download-tracker').addEventListener('click', downloadTracker);
   $('#download-gq').addEventListener('click', downloadGeneralQuestions);
-  $('#clear').addEventListener('click', () => { if (confirm('Remove all loaded files from this session?')) location.reload(); });
+  $('#clear').addEventListener('click', () => { if (confirm('Remove all loaded files from this session?')) startOver(); });
   $('#detail-close').addEventListener('click', () => $('#detail').close());
   $('#results-table').addEventListener('click', onResultsClick);
+}
+
+/**
+ * Forget everything loaded in this session without reloading the page. A page reload is not
+ * enough: browsers can bring the page back from their cache with the old files still in memory.
+ */
+function startOver() {
+  portfolio = new Portfolio(cfg);
+  rows = [];
+  sources.state = null; sources.history = null; sources.metrics = null;
+  $('#file-input').value = '';
+  ['#f-region', '#f-bu'].forEach((sel) => { $(sel).value = ''; });
+  $('#f-search').value = '';
+  if ($('#detail').open) $('#detail').close();
+  $('#alerts').innerHTML = '';
+  $('#busy').hidden = true;
+  selectTab('results');
+  refresh([{ title: 'Session cleared', body: '<p>All files from this session were removed. Load the files again to start a new calculation.</p>' }]);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function selectTab(name) {
@@ -248,9 +267,9 @@ function renderResults() {
       <td><span class="market">${esc(r.identity.country_name)}${r.lighthouse ? '*' : ''}</span> <span class="sub">${esc(r.business_unit)}</span><br><span class="sub">${esc(r.sub.source_file_name)} · v${r.sub.version}</span></td>
       <td>${esc(r.identity.region)}${r.identity.subregion ? ` <span class="sub">${esc(r.identity.subregion)}</span>` : ''}<br><span class="sub">${esc(r.identity.profile)} profile</span></td>
       <td>${gauge(r.self_current, r.country_target, r.validated_current)}</td>
-      <td class="num">${fmt(r.self_current)}</td><td class="num">${fmt(r.validated_current)}</td><td class="num${r.target_note ? ' assumed' : ''}"${r.target_note ? ` title="${esc(r.target_note)}"` : ''}>${fmt(r.country_target)}</td>
+      <td class="num">${fmt(r.self_current)}</td><td class="num">${fmt(r.validated_current)}${r.excel_match === true ? '<br><span class="sub" title="Same as the workbook Summary outcome">= Excel</span>' : r.excel_match === false ? `<br><span class="sub excel-diff" title="${esc(r.excel_note)}">Excel ${fmt(r.excel_summary)}</span>` : ''}</td><td class="num${r.target_note ? ' assumed' : ''}"${r.target_note ? ` title="${esc(r.target_note)}"` : ''}>${fmt(r.country_target)}</td>
       <td>${r.needs_choice ? '–' : !portfolio.history ? '<span class="sub">Load 2025 tracker</span>' : yoy(r.history.overall['2025 Current Maturity'], r.bench.yoy, r.bench.yoy_self)}</td>
-      <td>${pill(r.country_status)}${r.missing_self.length || r.missing_target.length ? `<br><span class="sub">${[r.missing_self.length ? `${r.missing_self.length} skipped (no self)` : '', r.missing_target.length ? `<span class="assumed">${r.missing_target.length} target = self</span>` : ''].filter(Boolean).join(', ')}</span>` : ''}</td>
+      <td>${pill(r.country_status)}${r.missing_self.length || r.missing_target.length ? `<br><span class="sub">${[r.missing_self.length ? `<span class="assumed">${r.missing_self.length} blank = 0</span>` : '', r.missing_target.length ? `<span class="assumed">${r.missing_target.length} target blank = 0</span>` : ''].filter(Boolean).join(', ')}</span>` : ''}</td>
       <td>${r.needs_choice ? '–' : `${pill(r.gdm_status)}${r.gdm.pending ? `<br><span class="sub">${r.gdm.pending} Global row${r.gdm.pending === 1 ? '' : 's'} open</span>` : ''}`}</td>
       <td class="actions-cell"><button class="link" type="button" data-detail="${esc(r.key)}">Details</button><br><button class="link" type="button" data-country="${esc(r.key)}">Country file</button></td>
     </tr>`).join('')}</tbody>`;
@@ -271,16 +290,18 @@ async function onResultsClick(e) {
 function openDetail(r) {
   $('#detail-title').textContent = `${r.identity.country_name} ${r.business_unit}`;
   $('#detail-sub').textContent = `${r.identity.region} · ${r.identity.profile} profile · ${r.sub.source_file_name} (v${r.sub.version}) · submitter ${r.sub.submitter || '–'}`;
-  const caps = r.scores.capabilities.map((c) => `<tr><td>${esc(c.name)}</td><td>${gauge(c.self_current, c.country_target, r.validated_current === null ? null : c.validated_current)}</td><td class="num">${fmt(c.self_current)}</td><td class="num">${fmt(r.validated_current === null ? null : c.validated_current)}</td><td class="num${c.n_target_from_self ? ' assumed' : ''}"${c.n_target_from_self ? ` title="${c.n_target_from_self} target(s) taken from the 2026 self-rating"` : ''}>${fmt(c.country_target)}</td><td class="num">${fmt(r.yoy_cap[c.id].prev)}</td><td>${portfolio.history ? yoy(r.yoy_cap[c.id].prev, r.yoy_cap[c.id].d_validated, r.yoy_cap[c.id].d_self, { compact: true, newLabel: false }) : ''}</td><td class="num">${c.n_excluded_p0 || ''}</td></tr>`).join('');
+  const caps = r.scores.capabilities.map((c) => `<tr><td>${esc(c.name)}</td><td>${gauge(c.self_current, c.country_target, r.validated_current === null ? null : c.validated_current)}</td><td class="num">${fmt(c.self_current)}</td><td class="num">${fmt(r.validated_current === null ? null : c.validated_current)}</td><td class="num${c.n_target_blank ? ' assumed' : ''}"${c.n_target_blank ? ` title="${c.n_target_blank} blank target(s) counted as 0"` : ''}>${fmt(c.country_target)}</td><td class="num">${fmt(r.yoy_cap[c.id].prev)}</td><td>${portfolio.history ? yoy(r.yoy_cap[c.id].prev, r.yoy_cap[c.id].d_validated, r.yoy_cap[c.id].d_self, { compact: true, newLabel: false }) : ''}</td><td class="num">${c.n_excluded_p0 || ''}</td></tr>`).join('');
   const skills = r.sub.skills.map((s) => {
     const g = r.gdm.rows.get(s.row);
-    return `<tr class="${s.owner === 'gdm' ? 'row-gdm' : ''} ${s.inclusion === 0 ? 'row-p0' : ''}"><td class="num">${s.row}</td><td>${esc(s.skill)}</td><td>${s.owner === 'gdm' ? 'GDM' : 'Country'}</td><td class="num">${s.inclusion ?? ''}</td><td class="num">${s.self_current ?? '–'}</td>${s.owner === 'country' && s.inclusion === 1 && s.country_target === null && s.self_current !== null ? `<td class="num assumed" title="No target: the 2026 self-rating is used">${s.self_current}</td>` : `<td class="num">${s.country_target ?? '–'}</td>`}<td class="num">${g?.proposal.proposed_level ?? ''}</td><td class="num">${g?.final_value ?? ''}</td><td>${g ? esc(g.status) : ''}</td><td class="wrap sub">${esc([...(g?.proposal.notes || []), g?.note, ...s.issues].filter(Boolean).join(' · '))}</td></tr>`;
+    return `<tr class="${s.owner === 'gdm' ? 'row-gdm' : ''} ${s.inclusion === 0 ? 'row-p0' : ''}"><td class="num">${s.row}</td><td>${esc(s.skill)}</td><td>${s.owner === 'gdm' ? 'GDM' : 'Country'}</td><td class="num">${s.inclusion ?? ''}</td>${s.owner === 'country' && (s.self_raw === null || s.self_raw === undefined) ? '<td class="num assumed" title="Blank self-rating, counted as 0 like the Excel Summary outcome">0</td>' : `<td class="num">${s.self_current ?? '–'}</td>`}${s.target_raw === null || s.target_raw === undefined ? '<td class="num assumed" title="Blank target, counted as 0 like the Excel Summary outcome">0</td>' : `<td class="num">${s.country_target ?? '–'}</td>`}<td class="num">${g?.proposal.proposed_level ?? ''}</td><td class="num">${g?.final_value ?? ''}</td><td>${g ? esc(g.status) : ''}</td><td class="wrap sub">${esc([...(g?.proposal.notes || []), g?.note, ...s.issues].filter(Boolean).join(' · '))}</td></tr>`;
   }).join('');
-  const skipped = r.missing_self.map((s) => `Row ${s.row} ${s.skill}: no self-rating, left out of the calculation`);
-  const assumedT = r.missing_target.map((s) => `Row ${s.row} ${s.skill}: no target, the 2026 self-rating (${s.self_current}) is used`);
+  const textCell = (v) => typeof v === 'string' && v.length > 0;
+  const skipped = r.missing_self.map((s) => `Row ${s.row} ${s.skill}: ${textCell(s.self_raw) ? 'text in the cell, ignored' : 'blank, counted as 0'}`);
+  const assumedT = r.missing_target.map((s) => `Row ${s.row} ${s.skill}: target ${textCell(s.target_raw) ? 'is text, ignored' : 'blank, counted as 0'}`);
   $('#detail-body').innerHTML = `
     <div><span>${pill(r.country_status)}</span> <span>${r.needs_choice ? '' : pill(r.gdm_status)}</span></div>
-    ${skipped.length ? `<div class="alert"><h3>Rows left out (no self-rating)</h3><ul>${skipped.map((m) => `<li>${esc(m)}</li>`).join('')}</ul></div>` : ''}
+    ${r.excel_match === false ? `<div class="alert bad"><h3>Differs from the Excel Summary outcome (${fmt(r.excel_summary)})</h3><p>${esc(r.excel_note)}</p></div>` : r.excel_match === true ? `<p class="sub">Validated score equals the workbook's Summary outcome (${fmt(r.excel_summary)}).</p>` : ''}
+    ${skipped.length ? `<div class="alert"><h3 class="assumed">Blank self-ratings (as in the Excel Summary outcome)</h3><ul>${skipped.map((m) => `<li>${esc(m)}</li>`).join('')}</ul></div>` : ''}
     ${assumedT.length ? `<div class="alert"><h3 class="assumed">${esc(r.target_note)}</h3><ul>${assumedT.map((m) => `<li class="assumed">${esc(m)}</li>`).join('')}</ul></div>` : ''}
     <div><h3>Capabilities</h3><div class="table-wrap"><table><thead><tr><th>Capability</th><th>Current vs target (0 – 4)</th><th class="num group-own">Self</th><th class="num group-gdm">Validated</th><th class="num group-own">Target</th><th class="num">2025</th><th>YoY</th><th class="num">P=0</th></tr></thead><tbody>
     <tr><td><b>Overall</b></td><td>${gauge(r.self_current, r.country_target, r.validated_current)}</td><td class="num"><b>${fmt(r.self_current)}</b></td><td class="num"><b>${fmt(r.validated_current)}</b></td><td class="num${r.target_note ? ' assumed' : ''}"${r.target_note ? ` title="${esc(r.target_note)}"` : ''}><b>${fmt(r.country_target)}</b></td><td class="num">${fmt(r.history.overall['2025 Current Maturity'])}</td><td>${portfolio.history ? yoy(r.history.overall['2025 Current Maturity'], r.bench.yoy, r.bench.yoy_self, { compact: true }) : ''}</td><td></td></tr>${caps}</tbody></table></div></div>

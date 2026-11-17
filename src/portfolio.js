@@ -9,14 +9,32 @@ import { scoreSubmission, countryInputStatus, COUNTRY_STATUS, GDM_STATUS } from 
 import { IdentityResolver } from './identity.js';
 import { mean, round, nowIso } from './util.js';
 
-/** Short note when some or all 2027 targets were taken from the 2026 self-ratings (blank column L). */
-export function targetNote(scores) {
-  const n = scores.target_from_self;
-  if (!n) return null;
-  const rated = scores.capabilities.reduce((a, c) => a + c.n_country_included - c.n_self_skipped, 0);
-  return n >= rated
-    ? 'No targets set: 2027 target = 2026 self-rating'
-    : `${n} of ${rated} targets not set: 2026 self-rating used for those`;
+/** Note on blank / text cells, which are treated exactly like the Summary outcome sheet does. */
+export function blanksNote(scores) {
+  const parts = [];
+  if (scores.self_blank) parts.push(`${scores.self_blank} blank self-rating${scores.self_blank === 1 ? '' : 's'} counted as 0`);
+  if (scores.self_text) parts.push(`${scores.self_text} text cell${scores.self_text === 1 ? '' : 's'} in K ignored`);
+  if (scores.target_blank) parts.push(`${scores.target_blank} blank target${scores.target_blank === 1 ? '' : 's'} counted as 0`);
+  return parts.length ? `${parts.join('; ')} (as in the Excel Summary outcome)` : null;
+}
+
+/** Compare our score with the workbook's own Summary outcome (cached D8) and explain differences. */
+export function excelParity(sub, gdm, validated) {
+  const cached = sub.parse_check?.workbook_cached_overall;
+  if (typeof cached !== 'number') return { excel_summary: null, excel_match: null, excel_note: 'No Summary outcome value in the workbook' };
+  if (validated === null || validated === undefined) return { excel_summary: cached, excel_match: null, excel_note: 'Not validated yet' };
+  const match = Math.abs(validated - cached) < 0.005;
+  if (match) return { excel_summary: cached, excel_match: true, excel_note: null };
+  const why = [];
+  if (sub.parse_check && sub.parse_check.match === false) why.push(`the workbook was not recalculated before saving (its cells give ${sub.parse_check.reproduced.toFixed(3)})`);
+  const diffs = [];
+  for (const k of sub.skills.filter((x) => x.owner === 'gdm')) {
+    const r = gdm.rows.get(k.row);
+    const fileVal = typeof k.self_raw === 'number' ? k.self_raw : (k.self_raw === null || k.self_raw === undefined ? 0 : null);
+    if (r && r.final_state === 'resolved' && fileVal !== r.final_value) diffs.push(`row ${k.row} ${k.skill}: workbook ${fileVal ?? 'text'}, Global Metrics ${r.final_value}`);
+  }
+  if (diffs.length) why.push(`Global Metrics values differ from the GDM rows in the workbook (${diffs.join('; ')})`);
+  return { excel_summary: cached, excel_match: false, excel_note: why.length ? why.join('. ') : 'Unexplained difference' };
 }
 
 export class Portfolio {
@@ -154,7 +172,8 @@ export class Portfolio {
         country_status: choice ? COUNTRY_STATUS.DUPLICATE : ci.status,
         missing_self: ci.missingSelf,
         missing_target: ci.missingTarget,
-        target_note: targetNote(scores),
+        target_note: blanksNote(scores),
+        ...(choice ? { excel_summary: null, excel_match: null, excel_note: null } : excelParity(base, gdm, validated)),
         gdm,
         gdm_status: choice ? '-' : gdm.status,
         scores,

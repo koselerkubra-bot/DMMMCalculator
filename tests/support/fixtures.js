@@ -33,7 +33,7 @@ export async function makeCountryWorkbook(cfg, opts = {}) {
   q.getCell('K4').value = 'Self-rating'; q.getCell('L4').value = 'Target Rating +1 years'; q.getCell('M4').value = 'Comments';
   q.getCell('P4').value = 'Weighting';
   const k = opts.k ?? ((row, s) => (s.owner === 'gdm' ? null : 2));
-  const l = opts.l ?? ((row, s) => (s.owner === 'gdm' ? null : 3));
+  const l = opts.l ?? (() => 3); // real workbooks carry targets on every row, GDM rows included
   const p = opts.p ?? (() => 1);
   for (const s of model.skills) {
     q.getCell(`C${s.row}`).value = s.skill;

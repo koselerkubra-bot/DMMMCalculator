@@ -1,6 +1,7 @@
 // Parses one DMMM 2026 country workbook into a normalised submission record.
 // The original file is never modified: only cached cell values and formula text are read.
 import { extractGeneral } from './generalQuestions.js';
+import { excelCellValue } from './scoring.js';
 import { openWorkbook, colToNum } from './xlsxReader.js';
 import { norm, parseRating, parseFlag, isBlank, sha256Hex, mean, nowIso } from './util.js';
 import { identityKey } from './identity.js';
@@ -196,14 +197,16 @@ export async function parseCountryWorkbook(bytes, fileName, cfg, resolver, opts 
   try { sub.general_detail = gq ? extractGeneral(gq) : null; } catch (e) { sub.general_detail = { error: e.message }; }
 
   // ---- Parse check: reproduce the workbook's own Summary formula from the parsed cells ------
-  // The workbook averages Summary column G (= K, blank counted as 0, P ignored). If our reading
+  // The workbook averages Summary column G (= K, blank counted as 0, text ignored, P ignored). If our reading
   // of K reproduces the cached Summary!D8, the parse is proven to match what Excel calculated.
   const cachedOverall = summary.value('D8');
   if (typeof cachedOverall === 'number') {
-    const caps = model.capabilities.map((cap) => mean(sub.skills.filter((x) => x.capability_id === cap.id).map((x) => {
-      const v = parseRating(x.self_raw, model.valid_scores).value; return v ?? 0;
-    })));
-    const ours = mean(caps);
+    // Same cell rules as Summary column G: empty = 0, text ignored (see scoring.excelCellValue).
+    const caps = model.capabilities.map((cap) => {
+      const vals = sub.skills.filter((x) => x.capability_id === cap.id).map((x) => excelCellValue(x.self_raw)).filter((v) => v !== null);
+      return vals.length ? mean(vals) : null;
+    }).filter((v) => v !== null);
+    const ours = caps.length ? mean(caps) : 0;
     const anyInput = sub.skills.some((x) => !isBlank(x.self_raw));
     sub.parse_check = { workbook_cached_overall: cachedOverall, reproduced: ours, match: Math.abs(ours - cachedOverall) < 1e-6 };
     if (anyInput && !sub.parse_check.match) {

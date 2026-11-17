@@ -40,7 +40,10 @@ export function resultColumns(model) {
     { h: '2026 Validated Current', w: 11, g: 'gdm', num: true, v: (r) => r2(r.validated_current) },
     { h: '2027 Target Maturity', w: 11, g: 'country', num: true, v: (r) => r2(r.country_target), blue: (r) => !!r.target_note },
     { h: 'Country Input Status', w: 22, g: 'country', status: true, v: (r) => r.country_status },
-    { h: 'Target Note', w: 30, g: 'country', wrap: true, v: (r) => r.target_note, blue: (r) => !!r.target_note },
+    { h: 'Blank Cells Note', w: 30, g: 'country', wrap: true, v: (r) => r.target_note, blue: (r) => !!r.target_note },
+    { h: 'Excel Summary Outcome', w: 10, g: 'country', num: true, v: (r) => r2(r.excel_summary) },
+    { h: 'Matches Excel', w: 8, g: 'country', v: (r) => (r.excel_match === null || r.excel_match === undefined ? null : r.excel_match ? 'Yes' : 'No') },
+    { h: 'Excel Difference Reason', w: 40, g: 'country', wrap: true, v: (r) => (r.excel_match === false ? r.excel_note : null) },
     { h: 'GDM Validation Status', w: 20, g: 'gdm', status: true, v: (r) => r.gdm_status },
     { h: 'Global Rows Pending', w: 9, g: 'gdm', v: (r) => (r.needs_choice ? null : r.gdm.pending) },
     { h: 'YoY vs 2025 (validated)', w: 10, g: 'bench', num: true, v: (r) => r2(r.bench.yoy) },
@@ -60,7 +63,7 @@ export function resultColumns(model) {
     cols.push(
       { h: `2026 ${n} Self`, w: 9, g: 'country', num: true, v: (r) => (r.needs_choice ? null : r2(capOf(r).self_current)) },
       { h: `2026 ${n} Validated`, w: 9, g: 'gdm', num: true, v: (r) => (r.validated_current === null ? null : r2(capOf(r).validated_current)) },
-      { h: `2027 ${n} Goal`, w: 9, g: 'country', num: true, v: (r) => (r.needs_choice ? null : r2(capOf(r).country_target)), blue: (r) => !r.needs_choice && capOf(r).n_target_from_self > 0 },
+      { h: `2027 ${n} Goal`, w: 9, g: 'country', num: true, v: (r) => (r.needs_choice ? null : r2(capOf(r).country_target)), blue: (r) => !r.needs_choice && capOf(r).n_target_blank > 0 },
     );
   }
   for (const gq of model.general_questions) cols.push({ h: gq.label, w: 14, g: 'info', v: (r) => r.sub.general?.[gq.key] ?? null });
@@ -302,7 +305,7 @@ export async function buildTrackerWorkbook(ExcelJS, portfolio, rows, opts = {}) 
   const resByKey = new Map(rows.map((r) => [r.key, r]));
   const intake = portfolio.submissions.map((s) => {
     const r = s.key ? resByKey.get(s.key) : null;
-    const own = s.skills.filter((x) => x.owner === 'country' && x.inclusion === 1);
+    const own = s.skills.filter((x) => x.owner === 'country');
     const dupCount = s.key ? portfolio.versionsOf(s.key).length : 0;
     return { s, r, own, dupCount };
   });
@@ -320,8 +323,8 @@ export async function buildTrackerWorkbook(ExcelJS, portfolio, rows, opts = {}) 
     { h: 'Template Detected', w: 16, v: (x) => (x.s ? (x.s.template_ok ? `DMMM ${model.assessment_year} (${x.s.capability_boundaries_source})` : 'Not a valid 2026 template') : null) },
     { h: 'Skills Parsed', w: 7, v: (x) => x.s?.skills.length ?? null },
     { h: 'Country Skills Included', w: 8, v: (x) => x.own?.length ?? null },
-    { h: 'Skipped: blank self (K)', w: 9, v: (x) => (x.own ? x.own.filter((k) => k.self_current === null).length : null) },
-    { h: 'Target = self (blank L)', w: 9, v: (x) => (x.own ? x.own.filter((k) => k.self_current !== null && k.country_target === null).length : null) },
+    { h: 'Blank self (K) counted as 0', w: 9, v: (x) => (x.own ? x.own.filter((k) => k.self_raw === null || k.self_raw === undefined).length : null) },
+    { h: 'Blank target (L) counted as 0', w: 9, v: (x) => (x.own ? x.own.filter((k) => k.target_raw === null || k.target_raw === undefined).length : null) },
     { h: 'Excluded P=0', w: 7, v: (x) => x.s?.skills.filter((k) => k.inclusion === 0).length ?? null },
     { h: 'Country Input Completeness', w: 22, status: true, v: (x) => (x.r && x.r.sub === x.s ? x.r.country_status : null) },
     { h: 'Version', w: 7, v: (x) => x.s?.version ?? null },
@@ -451,10 +454,10 @@ export async function buildTrackerWorkbook(ExcelJS, portfolio, rows, opts = {}) 
   const ab = wb.addWorksheet('About');
   title(ab, 'How to read this tracker');
   const about = [
-    ['2026 Self Current', 'Mean of the capability scores, each the mean of the country-owned skills (column K) with P = 1. GDM-managed rows are not part of it. A skill with a blank K is left out as if it were not there; a capability with no rated skills is left out of the mean.'],
-    ['2026 Validated Current', 'Same, plus the GDM values for the GDM-managed rows. Shown only when the country has started and GDM status is Validated.'],
-    ['2027 Target Maturity', 'Country-owned targets (column L) of included skills. A blank L takes the 2026 self-rating of that skill. Global never sets or changes targets.'],
-    ['Blue italic values', 'Targets that include one or more blank L cells filled with the 2026 self-rating. The Target Note column says how many.'],
+    ['2026 Self Current', 'Like the workbook Summary outcome: mean of the 9 capability scores, each the AVERAGE of column K over the capability rows (empty = 0, text ignored, column P not used), country-owned rows only.'],
+    ['2026 Validated Current', 'Same rules over all rows, with Global Metrics values on the GDM rows. Equals the workbook Summary outcome (D8) whenever the Global Metrics values equal the GDM values in the workbook; see Matches Excel.'],
+    ['2027 Target Maturity', 'Like the Summary outcome target: AVERAGE of column L over all rows (empty = 0, text ignored). Global never sets or changes targets.'],
+    ['Blue italic values', 'Scores that include blank cells counted as 0, exactly as the Excel Summary outcome does. The Blank Cells Note column says how many.'],
     ['P = 0', 'The skill is removed from numerator and denominator. A rating of 0 is a valid score and is averaged.'],
     ['Country Input Status', 'Complete | Not started | Template error | Identity error | Duplicate - choose active version. Blank ratings or targets do not block the calculation.'],
     ['GDM Validation Status', 'Pending Global Data | Ready for Global review | Validation conflict | Validated. Independent of country input status.'],

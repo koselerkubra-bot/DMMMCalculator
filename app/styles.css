@@ -215,3 +215,5 @@ dialog::backdrop { background: rgba(26, 32, 44, .5); }
 button.secondary { background: var(--blue); color: #fff; border: 0; border-radius: 8px; padding: 11px 18px; font-weight: 700; font-size: 15px; cursor: pointer; }
 button.secondary:hover { filter: brightness(1.1); }
 button.secondary:disabled { opacity: .6; cursor: progress; }
+
+.excel-diff { color: var(--earth-text); font-weight: 700; }
